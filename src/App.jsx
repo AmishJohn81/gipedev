@@ -54,7 +54,7 @@ function App() {
             <p>Practical tools built around real needs, explored with curiosity and crafted with care.</p>
           </div>
 
-          <a className="project-card" href="/5eTools/dev/index.html">
+          <a className="project-card" href="/5eTools/dev/">
             <div className="project-preview">
               <span className="preview-label">Featured project</span>
               <div className="die" aria-hidden="true">20</div>
