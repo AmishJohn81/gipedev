@@ -9,6 +9,10 @@ npm install
 npm run dev
 ```
 
+Copy `.env.example` to `.env.local` for local development. The frontend uses
+`VITE_API_BASE_URL` to locate the API. In the Render Static Site, set this variable
+to the public URL of the deployed API before building the frontend.
+
 Create a production build with `npm run build`.
 
 ## API
@@ -55,6 +59,28 @@ To run the API and a local PostgreSQL database together:
 
 ```bash
 docker compose up --build
+```
+
+### Stopping local development
+
+Stop the React development server in its terminal with `Ctrl+C`, then stop the
+API and PostgreSQL containers from the repository root:
+
+```bash
+docker compose down
+```
+
+This removes the containers and local Docker network while preserving PostgreSQL
+data. Confirm that all services are stopped with:
+
+```bash
+docker compose ps
+```
+
+To also permanently delete the local database and its submissions, run:
+
+```bash
+docker compose down --volumes
 ```
 
 For a Render Web Service, select the Docker runtime and set the Dockerfile path to
