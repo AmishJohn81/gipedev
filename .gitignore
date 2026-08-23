@@ -1,7 +1,11 @@
 node_modules/
 dist/
+.dotnet-cli/
 bin/
 obj/
+.vs/
+*.user
+*.suo
 .env
 .env.*
 !.env.example

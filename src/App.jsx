@@ -1,4 +1,90 @@
+import { useState } from 'react'
+
 const Arrow = () => <span aria-hidden="true">↗</span>
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+  || (import.meta.env.DEV ? 'http://localhost:10000' : '')
+
+function ContactForm() {
+  const [status, setStatus] = useState('idle')
+  const [feedback, setFeedback] = useState('')
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+
+    if (!apiBaseUrl) {
+      setStatus('error')
+      setFeedback('The contact form is not configured yet. Please use the email link below.')
+      return
+    }
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    const payload = Object.fromEntries(formData.entries())
+
+    setStatus('submitting')
+    setFeedback('')
+
+    try {
+      const response = await fetch(`${apiBaseUrl.replace(/\/$/, '')}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.status === 429) {
+        throw new Error('Too many messages were sent recently. Please try again in a few minutes.')
+      }
+
+      if (!response.ok) {
+        throw new Error('Your message could not be sent. Please check the form and try again.')
+      }
+
+      form.reset()
+      setStatus('success')
+      setFeedback('Thanks—your message is on its way. I’ll get back to you soon.')
+    } catch (error) {
+      setStatus('error')
+      setFeedback(error.message || 'Something went wrong. Please try again.')
+    }
+  }
+
+  return (
+    <form className="contact-form" onSubmit={handleSubmit}>
+      <div className="form-row">
+        <label>
+          <span>Name</span>
+          <input name="name" type="text" maxLength="100" autoComplete="name" required />
+        </label>
+        <label>
+          <span>Email</span>
+          <input name="email" type="email" maxLength="254" autoComplete="email" required />
+        </label>
+      </div>
+      <label>
+        <span>Subject</span>
+        <input name="subject" type="text" maxLength="150" required />
+      </label>
+      <label>
+        <span>Message</span>
+        <textarea name="message" minLength="10" maxLength="5000" rows="6" required />
+      </label>
+      <label className="form-honeypot" aria-hidden="true">
+        <span>Company</span>
+        <input name="company" type="text" maxLength="100" tabIndex="-1" autoComplete="off" />
+      </label>
+      <div className="form-submit">
+        <button className="button button-light" type="submit" disabled={status === 'submitting'}>
+          {status === 'submitting' ? 'Sending…' : <>Send message <Arrow /></>}
+        </button>
+        {feedback && (
+          <p className={`form-feedback form-feedback-${status}`} role="status" aria-live="polite">
+            {feedback}
+          </p>
+        )}
+      </div>
+    </form>
+  )
+}
 
 function App() {
   return (
@@ -11,7 +97,7 @@ function App() {
         <nav aria-label="Main navigation">
           <a href="#work">Work</a>
           <a href="#about">About</a>
-          <a className="nav-cta" href="mailto:hello@gipedev.com">Get in touch</a>
+          <a className="nav-cta" href="#contact">Get in touch</a>
         </nav>
       </header>
 
@@ -26,7 +112,7 @@ function App() {
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#work">Explore the work <Arrow /></a>
-              <a className="text-link" href="mailto:hello@gipedev.com">Start a conversation <Arrow /></a>
+              <a className="text-link" href="#contact">Start a conversation <Arrow /></a>
             </div>
           </div>
           <div className="hero-visual" aria-hidden="true">
@@ -83,11 +169,21 @@ function App() {
             </div>
           </div>
         </section>
+
+        <section className="contact" id="contact" aria-labelledby="contact-title">
+          <div className="contact-inner">
+            <div className="contact-copy">
+              <p className="eyebrow">Have an idea?</p>
+              <h2 id="contact-title">Let’s make something <em>useful.</em></h2>
+              <p>Tell me a little about what you’re working on, what problem you want to solve, or where you could use a hand.</p>
+              <p className="contact-fallback">Prefer email? <a href="mailto:support@gipedev.com">support@gipedev.com</a></p>
+            </div>
+            <ContactForm />
+          </div>
+        </section>
       </main>
 
       <footer>
-        <div><p className="eyebrow">Have an idea?</p><h2>Let’s make something useful.</h2></div>
-        <a className="button button-light" href="mailto:hello@gipedev.com">hello@gipedev.com <Arrow /></a>
         <div className="footer-bottom"><span>© {new Date().getFullYear()} GipeDev</span><span>Designed & built with care.</span></div>
       </footer>
     </div>
