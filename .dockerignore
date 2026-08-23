@@ -1,0 +1,15 @@
+.git
+.github
+.vscode
+.dotnet-cli
+5eTools
+dist
+node_modules
+**/bin
+**/obj
+**/.vs
+**/*.user
+**/*.suo
+.env
+.env.*
+README.md
