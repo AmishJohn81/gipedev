@@ -7,7 +7,8 @@ body { margin: 0; min-width: 320px; min-height: 100vh; overflow-x: hidden; }
 button, select, input { font: inherit; }
 a { color: inherit; }
 .vector-text { display: block; width: calc(var(--vector-ratio) * 1em); height: 1em; max-width: 100%; overflow: visible; fill: none; stroke: #efffff; stroke-width: .36; stroke-linecap: square; stroke-linejoin: miter; shape-rendering: geometricPrecision; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 5px #65d8ff) drop-shadow(0 0 14px #168cff); }
-.asteroids-app { position: relative; min-height: 100vh; overflow: hidden; isolation: isolate; background: radial-gradient(circle at 70% 20%, #13223d 0, #080b12 27%, #030405 64%); }
+.asteroids-app { position: relative; min-height: 100vh; overflow: hidden; isolation: isolate; user-select: none; -webkit-user-select: none; background: radial-gradient(circle at 70% 20%, #13223d 0, #080b12 27%, #030405 64%); }
+.asteroids-app input, .asteroids-app select, .asteroids-app textarea { user-select: text; -webkit-user-select: text; }
 .cabinet-backdrop { position: fixed; z-index: -1; inset: 0; overflow: hidden; }
 .space-lines { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: #f5f3e7; stroke-width: 4; }.space-lines > path, .space-lines > circle { opacity: .12; }.space-lines circle { stroke-width: 8; }.space-lines .impact { stroke-width: 2; }
 .space-lines .game-asteroids { stroke: #efffff; stroke-width: 1.8; stroke-linecap: square; stroke-linejoin: miter; opacity: .78; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 5px #65d8ff) drop-shadow(0 0 12px #168cff); }
