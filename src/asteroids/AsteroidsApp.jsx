@@ -102,7 +102,8 @@ function ShipCursor() {
       requestAnimationFrame(moveShot)
     }
 
-    const handleDown = () => {
+    const handleDown = (event) => {
+      if (event.target instanceof Element && event.target.closest('button, input, select, textarea, a')) return
       if (fireTimer.current) return
       fireShot()
       fireTimer.current = window.setInterval(fireShot, 290)
@@ -155,10 +156,9 @@ function CabinetBackdrop() {
     <div className="cabinet-backdrop" aria-hidden="true">
       <svg className="space-lines" viewBox="0 0 1600 900" preserveAspectRatio="none">
         <defs>
-          <path id="rock-a" d="M0-48 18-39 39-42 48-20 39-2 48 20 29 43 8 36-10 48-32 38-46 17-38-3-48-21-29-43-11-36Z" />
-          <path id="rock-b" d="M0-47 23-39 41-24 34-7 49 8 39 31 17 43-3 35-21 47-42 28-37 9-49-8-34-29-16-25Z" />
-          <path id="rock-c" d="M-4-48 15-35 35-42 47-22 35-8 48 12 31 36 9 48-5 34-27 43-45 23-36 4-48-15-28-38Z" />
-          <path id="rock-d" d="M-8-47 10-34 31-43 46-27 38-8 49 7 39 27 20 44 1 34-18 47-39 31-35 12-48-4-37-24-20-38Z" />
+          <path id="rock-a" d="M-28-46-8-20 12-47 33-21 25 3 36 26 7 49-25 49-47 25-49-20Z" />
+          <path id="rock-b" d="M-21-50 12-47 46-19 46-7 12 4 43 28 27 44 13 30-21 48-45 11-45-25-10-24Z" />
+          <path id="rock-c" d="M-24-53 0-36 26-51 50-23 23-11 48 16 21 53-10 41-26 52-50 24-36-1-49-30Z" />
         </defs>
         <path d="M-80 780C240 560 380 490 680 445S1210 260 1690 20" />
         <path d="M-100 840C230 620 410 540 700 500S1260 310 1710 80" />
@@ -168,14 +168,12 @@ function CabinetBackdrop() {
         <circle cx="220" cy="720" r="68" />
         <path className="impact" d="m1300 65 12 66 42-52-22 66 67-21-57 39 67 15-70 2 48 48-58-38 12 69-29-65-31 64 12-69-59 36 49-46-70 1 68-17-58-37 67 19-25-65 45 53Z" />
         <g className="game-asteroids">
-          <use href="#rock-a" transform="translate(145 155) scale(1.05) rotate(-18)" />
-          <use href="#rock-a" transform="translate(1210 710) scale(.62) rotate(94)" />
-          <use href="#rock-b" transform="translate(520 170) scale(.55) rotate(31)" />
-          <use href="#rock-b" transform="translate(1460 430) scale(.92) rotate(-73)" />
-          <use href="#rock-c" transform="translate(270 555) scale(.72) rotate(67)" />
-          <use href="#rock-c" transform="translate(1050 105) scale(.42) rotate(-36)" />
-          <use href="#rock-d" transform="translate(760 740) scale(.96) rotate(14)" />
-          <use href="#rock-d" transform="translate(1325 210) scale(.5) rotate(128)" />
+          <use href="#rock-a" transform="translate(150 160) scale(1.05) rotate(-8)" />
+          <use href="#rock-a" transform="translate(1215 710) scale(.62) rotate(91)" />
+          <use href="#rock-b" transform="translate(505 175) scale(.58) rotate(26)" />
+          <use href="#rock-b" transform="translate(1450 435) scale(.94) rotate(-68)" />
+          <use href="#rock-c" transform="translate(280 565) scale(.74) rotate(62)" />
+          <use href="#rock-c" transform="translate(1060 115) scale(.46) rotate(-31)" />
         </g>
       </svg>
       <div className="color-ray ray-red" />
@@ -195,15 +193,42 @@ function IntroFlyby() {
 }
 
 function ScoreEntry({ onClose }) {
+  const [pilot, setPilot] = useState('')
+  const [score, setScore] = useState('')
+  const [pilotMenuOpen, setPilotMenuOpen] = useState(false)
+  const [addingPilot, setAddingPilot] = useState(false)
+  const [newPilot, setNewPilot] = useState('')
+
+  const choosePilot = (name) => {
+    setPilot(name)
+    setAddingPilot(false)
+    setPilotMenuOpen(false)
+  }
+
   return (
     <div className="score-entry-panel">
       <div className="panel-header">
         <span><VectorText text="NEW TRANSMISSION" /></span>
-        <button type="button" onClick={onClose} aria-label="Close score entry">×</button>
+        <button type="button" onClick={onClose} aria-label="Close score entry"><VectorText text="X" /></button>
       </div>
       <form onSubmit={(event) => event.preventDefault()}>
-        <label><span><VectorText text="PILOT" /></span><select defaultValue=""><option value="" disabled>Select player</option><option>JGI</option><option>MKW</option><option>ACE</option></select></label>
-        <label><span><VectorText text="SCORE" /></span><input inputMode="numeric" placeholder="00000" /></label>
+        <fieldset className="pilot-field">
+          <legend><VectorText text="PILOT" /></legend>
+          <div className="pilot-select">
+            <button className="pilot-select-trigger" type="button" onClick={() => setPilotMenuOpen((open) => !open)} aria-haspopup="listbox" aria-expanded={pilotMenuOpen}>
+              <VectorText text={pilot || 'SELECT PILOT'} />
+              <i aria-hidden="true" />
+            </button>
+            {pilotMenuOpen && (
+              <div className="pilot-select-menu" role="listbox">
+                {['JGI', 'MKW', 'ACE'].map((name) => <button type="button" role="option" aria-selected={pilot === name} key={name} onClick={() => choosePilot(name)}><VectorText text={name} /></button>)}
+                <button type="button" role="option" aria-selected="false" onClick={() => { setAddingPilot(true); setPilotMenuOpen(false) }}><VectorText text="NEW PILOT" /></button>
+              </div>
+            )}
+          </div>
+          {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} aria-label="New pilot name" autoFocus /><VectorText text={newPilot || 'PILOT NAME'} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={!newPilot} onClick={() => choosePilot(newPilot)}><VectorText text="ADD" /></button></div>}
+        </fieldset>
+        <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 8))} inputMode="numeric" aria-label="Score" /><VectorText text={score || '00000'} /><i className="vector-caret" /></span></label>
         <button className="arcade-button" type="submit"><VectorText text="RECORD SCORE" /></button>
         <p><VectorText text="VISUAL PROTOTYPE // SCORE TRANSMISSION OFFLINE" /></p>
       </form>
