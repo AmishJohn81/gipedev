@@ -15,6 +15,12 @@ to the public URL of the deployed API before building the frontend.
 
 Create a production build with `npm run build`.
 
+The Asteroids Home League visual prototype is available during local development at:
+
+```text
+http://localhost:5173/asteroids/
+```
+
 ## API
 
 The general GipeDev API is an ASP.NET Core application in `api/GipeDev.Api`.

@@ -22,4 +22,12 @@ function copy5eTools() {
 
 export default defineConfig({
   plugins: [react(), copy5eTools()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve('index.html'),
+        asteroids: resolve('asteroids/index.html'),
+      },
+    },
+  },
 })
