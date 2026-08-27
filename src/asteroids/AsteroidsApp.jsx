@@ -65,6 +65,9 @@ function ShipCursor() {
         cooldownUntil.current = firedAt + 2000
       }
       const angle = current.current.angle * Math.PI / 180
+      const viewport = shotLayerRef.current.getBoundingClientRect()
+      const viewportWidth = viewport.width || document.documentElement.clientWidth
+      const viewportHeight = viewport.height || document.documentElement.clientHeight
       const startX = current.current.x + Math.cos(angle) * 22
       const startY = current.current.y + Math.sin(angle) * 22
       const shot = document.createElement('i')
@@ -76,9 +79,8 @@ function ShipCursor() {
       const horizontalComponent = Math.abs(Math.cos(angle))
       const verticalComponent = Math.abs(Math.sin(angle))
       const horizontalShot = horizontalComponent >= verticalComponent
-      const dominantComponent = horizontalShot ? horizontalComponent : verticalComponent
-      const dominantDimension = horizontalShot ? window.innerWidth : window.innerHeight
-      const travelDistance = dominantDimension * .8 / dominantComponent
+      const dominantDimension = horizontalShot ? viewportWidth : viewportHeight
+      const travelDistance = dominantDimension * .85
       const flightDuration = travelDistance / .4
       const moveShot = (now) => {
         if (disposed) return
@@ -86,8 +88,8 @@ function ShipCursor() {
         const distance = elapsed * .4
         const rawX = startX + Math.cos(angle) * distance
         const rawY = startY + Math.sin(angle) * distance
-        const wrappedX = ((rawX % window.innerWidth) + window.innerWidth) % window.innerWidth
-        const wrappedY = ((rawY % window.innerHeight) + window.innerHeight) % window.innerHeight
+        const wrappedX = ((rawX % viewportWidth) + viewportWidth) % viewportWidth
+        const wrappedY = ((rawY % viewportHeight) + viewportHeight) % viewportHeight
         shot.style.transform = `translate3d(${Math.round(wrappedX)}px, ${Math.round(wrappedY)}px, 0)`
 
         if (elapsed < flightDuration) {
@@ -152,6 +154,12 @@ function CabinetBackdrop() {
   return (
     <div className="cabinet-backdrop" aria-hidden="true">
       <svg className="space-lines" viewBox="0 0 1600 900" preserveAspectRatio="none">
+        <defs>
+          <path id="rock-a" d="M0-48 18-39 39-42 48-20 39-2 48 20 29 43 8 36-10 48-32 38-46 17-38-3-48-21-29-43-11-36Z" />
+          <path id="rock-b" d="M0-47 23-39 41-24 34-7 49 8 39 31 17 43-3 35-21 47-42 28-37 9-49-8-34-29-16-25Z" />
+          <path id="rock-c" d="M-4-48 15-35 35-42 47-22 35-8 48 12 31 36 9 48-5 34-27 43-45 23-36 4-48-15-28-38Z" />
+          <path id="rock-d" d="M-8-47 10-34 31-43 46-27 38-8 49 7 39 27 20 44 1 34-18 47-39 31-35 12-48-4-37-24-20-38Z" />
+        </defs>
         <path d="M-80 780C240 560 380 490 680 445S1210 260 1690 20" />
         <path d="M-100 840C230 620 410 540 700 500S1260 310 1710 80" />
         <path d="M-130 690C180 500 380 420 650 390S1190 230 1660-40" />
@@ -159,6 +167,16 @@ function CabinetBackdrop() {
         <circle cx="1300" cy="180" r="61" />
         <circle cx="220" cy="720" r="68" />
         <path className="impact" d="m1300 65 12 66 42-52-22 66 67-21-57 39 67 15-70 2 48 48-58-38 12 69-29-65-31 64 12-69-59 36 49-46-70 1 68-17-58-37 67 19-25-65 45 53Z" />
+        <g className="game-asteroids">
+          <use href="#rock-a" transform="translate(145 155) scale(1.05) rotate(-18)" />
+          <use href="#rock-a" transform="translate(1210 710) scale(.62) rotate(94)" />
+          <use href="#rock-b" transform="translate(520 170) scale(.55) rotate(31)" />
+          <use href="#rock-b" transform="translate(1460 430) scale(.92) rotate(-73)" />
+          <use href="#rock-c" transform="translate(270 555) scale(.72) rotate(67)" />
+          <use href="#rock-c" transform="translate(1050 105) scale(.42) rotate(-36)" />
+          <use href="#rock-d" transform="translate(760 740) scale(.96) rotate(14)" />
+          <use href="#rock-d" transform="translate(1325 210) scale(.5) rotate(128)" />
+        </g>
       </svg>
       <div className="color-ray ray-red" />
       <div className="color-ray ray-yellow" />
@@ -211,10 +229,6 @@ export default function AsteroidsApp() {
         <section className="score-hero">
           <div className="hero-kicker"><VectorText text="ORIGINAL CABINET // HOME LEAGUE" /></div>
           <h1><span>Asteroids</span><b><VectorText text="HIGH SCORES" label="High Scores" /></b></h1>
-          <div className="vector-specimen" aria-label="Vector font specimen">
-            <VectorText text="ABCDEFGHIJKLMNOPQRSTUVWXYZ" label="A through Z" />
-            <VectorText text="0123456789" label="Zero through nine" />
-          </div>
           <div className="hero-subtitle"><VectorText text="ONE MACHINE // A HANDFUL OF PILOTS // NO EXTRA LIVES" /></div>
 
           <div className="leaderboard-shell">
