@@ -12,16 +12,20 @@ const initialScores = [
 function VectorShip({ className = '' }) {
   return (
     <svg className={className} viewBox="-22 -18 52 36" aria-hidden="true">
-      <path className="ship-hull" d="M26 0-17-14-9 0-17 14 26 0Z" />
-      <path className="ship-thrust thrust-top" d="M-12-6-27-9" />
-      <path className="ship-thrust thrust-center" d="M-9 0-31 0" />
-      <path className="ship-thrust thrust-bottom" d="M-12 6-27 9" />
+      <path className="ship-hull" d="M26 0-17-14-13 0-17 14 26 0Z" />
+      <path className="ship-thrust" d="M-13-6.5-29 0-13 6.5Z" />
     </svg>
   )
 }
 
 function ShipCursor() {
   const cursorRef = useRef(null)
+  const shotLayerRef = useRef(null)
+  const fireTimer = useRef(null)
+  const activeShots = useRef(0)
+  const lastShotAt = useRef(0)
+  const shotsInBurst = useRef(0)
+  const cooldownUntil = useRef(0)
   const lastPoint = useRef({ x: 0, y: 0 })
   const target = useRef({ x: -100, y: -100, angle: 0 })
   const current = useRef({ x: -100, y: -100, angle: 0 })
@@ -33,6 +37,7 @@ function ShipCursor() {
 
     document.body.classList.add('ship-cursor-active')
     let animationFrame
+    let disposed = false
 
     const handleMove = (event) => {
       const dx = event.clientX - lastPoint.current.x
@@ -42,14 +47,68 @@ function ShipCursor() {
       target.current.x = event.clientX
       target.current.y = event.clientY
       lastPoint.current = { x: event.clientX, y: event.clientY }
-      cursorRef.current?.style.setProperty('--thrust-length', Math.min(3.4, Math.max(.7, speed / 9)))
+      cursorRef.current?.style.setProperty('--thrust-length', Math.min(1.65, Math.max(.75, speed / 18)))
       cursorRef.current?.classList.add('is-thrusting')
       window.clearTimeout(handleMove.thrustTimer)
       handleMove.thrustTimer = window.setTimeout(() => cursorRef.current?.classList.remove('is-thrusting'), 90)
     }
 
-    const handleDown = () => cursorRef.current?.classList.add('is-firing')
-    const handleUp = () => cursorRef.current?.classList.remove('is-firing')
+    const fireShot = () => {
+      if (!shotLayerRef.current || activeShots.current >= 4) return
+      const firedAt = performance.now()
+      if (firedAt < cooldownUntil.current) return
+      if (lastShotAt.current && firedAt - lastShotAt.current < 290) return
+      lastShotAt.current = firedAt
+      shotsInBurst.current += 1
+      if (shotsInBurst.current === 4) {
+        shotsInBurst.current = 0
+        cooldownUntil.current = firedAt + 2000
+      }
+      const angle = current.current.angle * Math.PI / 180
+      const startX = current.current.x + Math.cos(angle) * 22
+      const startY = current.current.y + Math.sin(angle) * 22
+      const shot = document.createElement('i')
+      shot.className = 'cursor-projectile'
+      shotLayerRef.current.appendChild(shot)
+      activeShots.current += 1
+
+      const startedAt = performance.now()
+      const horizontalComponent = Math.abs(Math.cos(angle))
+      const verticalComponent = Math.abs(Math.sin(angle))
+      const horizontalShot = horizontalComponent >= verticalComponent
+      const dominantComponent = horizontalShot ? horizontalComponent : verticalComponent
+      const dominantDimension = horizontalShot ? window.innerWidth : window.innerHeight
+      const travelDistance = dominantDimension * .8 / dominantComponent
+      const flightDuration = travelDistance / .4
+      const moveShot = (now) => {
+        if (disposed) return
+        const elapsed = Math.min(now - startedAt, flightDuration)
+        const distance = elapsed * .4
+        const rawX = startX + Math.cos(angle) * distance
+        const rawY = startY + Math.sin(angle) * distance
+        const wrappedX = ((rawX % window.innerWidth) + window.innerWidth) % window.innerWidth
+        const wrappedY = ((rawY % window.innerHeight) + window.innerHeight) % window.innerHeight
+        shot.style.transform = `translate3d(${Math.round(wrappedX)}px, ${Math.round(wrappedY)}px, 0)`
+
+        if (elapsed < flightDuration) {
+          requestAnimationFrame(moveShot)
+        } else {
+          shot.remove()
+          activeShots.current = Math.max(0, activeShots.current - 1)
+        }
+      }
+      requestAnimationFrame(moveShot)
+    }
+
+    const handleDown = () => {
+      if (fireTimer.current) return
+      fireShot()
+      fireTimer.current = window.setInterval(fireShot, 290)
+    }
+    const handleUp = () => {
+      window.clearInterval(fireTimer.current)
+      fireTimer.current = null
+    }
 
     const animate = () => {
       current.current.x += (target.current.x - current.current.x) * 0.28
@@ -68,20 +127,24 @@ function ShipCursor() {
     animate()
 
     return () => {
+      disposed = true
       document.body.classList.remove('ship-cursor-active')
       window.removeEventListener('pointermove', handleMove)
       window.removeEventListener('pointerdown', handleDown)
       window.removeEventListener('pointerup', handleUp)
       window.clearTimeout(handleMove.thrustTimer)
+      window.clearInterval(fireTimer.current)
+      activeShots.current = 0
+      shotLayerRef.current?.replaceChildren()
       cancelAnimationFrame(animationFrame)
     }
   }, [])
 
   return (
-    <div className="ship-cursor" ref={cursorRef} aria-hidden="true">
-      <VectorShip />
-      <span className="cursor-shot" />
-    </div>
+    <>
+      <div className="shot-layer" ref={shotLayerRef} aria-hidden="true" />
+      <div className="ship-cursor" ref={cursorRef} aria-hidden="true"><VectorShip /></div>
+    </>
   )
 }
 

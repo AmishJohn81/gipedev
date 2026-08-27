@@ -60,7 +60,7 @@ export default function VectorText({ text, className = '', label }) {
       role={label ? 'img' : undefined}
       aria-label={label || undefined}
       aria-hidden={label ? undefined : 'true'}
-      preserveAspectRatio="xMinYMid meet"
+      preserveAspectRatio="xMidYMid meet"
     >
       {characters.map((character, index) => {
         const path = glyphs[character]
