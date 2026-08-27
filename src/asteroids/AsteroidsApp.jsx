@@ -253,7 +253,7 @@ export default function AsteroidsApp() {
       <main>
         <section className="score-hero">
           <div className="hero-kicker"><VectorText text="ORIGINAL CABINET // HOME LEAGUE" /></div>
-          <h1><span>Asteroids</span><b><VectorText text="HIGH SCORES" label="High Scores" /></b></h1>
+          <h1><span data-text="ASTEROIDS">Asteroids</span><b><VectorText text="HIGH SCORES" label="High Scores" /></b></h1>
           <div className="hero-subtitle"><VectorText text="ONE MACHINE // A HANDFUL OF PILOTS // NO EXTRA LIVES" /></div>
 
           <div className="leaderboard-shell">
