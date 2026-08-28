@@ -154,7 +154,7 @@ function ShipCursor() {
 function CabinetBackdrop() {
   return (
     <div className="cabinet-backdrop" aria-hidden="true">
-      <svg className="space-lines" viewBox="0 0 1600 900" preserveAspectRatio="none">
+      <svg className="space-lines" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
         <defs>
           <path id="rock-a" d="M-28-46-8-20 12-47 33-21 25 3 36 26 7 49-25 49-47 25-49-20Z" />
           <path id="rock-b" d="M-21-50 12-47 46-19 46-7 12 4 43 28 27 44 13 30-21 48-45 11-45-25-10-24Z" />
@@ -174,6 +174,14 @@ function CabinetBackdrop() {
           <use href="#rock-b" transform="translate(1450 435) scale(.94) rotate(-68)" />
           <use href="#rock-c" transform="translate(280 565) scale(.74) rotate(62)" />
           <use href="#rock-c" transform="translate(1060 115) scale(.46) rotate(-31)" />
+        </g>
+        <g className="mobile-game-asteroids">
+          <use href="#rock-a" transform="translate(650 120) scale(.55) rotate(-8)" />
+          <use href="#rock-a" transform="translate(935 745) scale(.42) rotate(91)" />
+          <use href="#rock-b" transform="translate(920 245) scale(.48) rotate(26)" />
+          <use href="#rock-b" transform="translate(675 610) scale(.62) rotate(-68)" />
+          <use href="#rock-c" transform="translate(655 355) scale(.4) rotate(62)" />
+          <use href="#rock-c" transform="translate(945 500) scale(.54) rotate(-31)" />
         </g>
       </svg>
       <div className="color-ray ray-red" />
