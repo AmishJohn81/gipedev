@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import VectorText from './VectorText.jsx'
 
-const initialScores = [
-  { rank: 1, player: 'JGI', score: 48290, date: 'AUG 18' },
-  { rank: 2, player: 'MKW', score: 35760, date: 'AUG 09' },
-  { rank: 3, player: 'ACE', score: 28440, date: 'JUL 27' },
-  { rank: 4, player: 'RJM', score: 19980, date: 'JUL 12' },
-  { rank: 5, player: 'KAT', score: 12560, date: 'JUN 30' },
-]
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+  || (import.meta.env.DEV ? 'http://localhost:10000' : '')
+
+const apiUrl = (path) => `${apiBaseUrl.replace(/\/$/, '')}${path}`
+
+function formatScoreDate(value) {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit',
+    timeZone: 'UTC',
+  }).format(new Date(value)).toUpperCase()
+}
 
 function VectorShip({ className = '' }) {
   return (
@@ -200,17 +205,60 @@ function IntroFlyby() {
   )
 }
 
-function ScoreEntry({ onClose }) {
-  const [pilot, setPilot] = useState('')
+function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
+  const [pilotId, setPilotId] = useState('')
   const [score, setScore] = useState('')
   const [pilotMenuOpen, setPilotMenuOpen] = useState(false)
   const [addingPilot, setAddingPilot] = useState(false)
   const [newPilot, setNewPilot] = useState('')
+  const [status, setStatus] = useState('idle')
+  const [feedback, setFeedback] = useState('')
 
-  const choosePilot = (name) => {
-    setPilot(name)
+  const selectedPilot = pilots.find((entry) => entry.id === pilotId)
+
+  const choosePilot = (pilot) => {
+    setPilotId(pilot.id)
     setAddingPilot(false)
     setPilotMenuOpen(false)
+    setFeedback('')
+  }
+
+  const addPilot = async () => {
+    setStatus('submitting')
+    setFeedback('')
+
+    try {
+      const pilot = await onCreatePilot(newPilot)
+      choosePilot(pilot)
+      setNewPilot('')
+      setStatus('idle')
+    } catch (error) {
+      setStatus('error')
+      setFeedback(error.message || 'PILOT REGISTRATION FAILED')
+    }
+  }
+
+  const submitScore = async (event) => {
+    event.preventDefault()
+
+    if (!pilotId || !score) {
+      setStatus('error')
+      setFeedback('SELECT PILOT AND ENTER SCORE')
+      return
+    }
+
+    setStatus('submitting')
+    setFeedback('TRANSMITTING SCORE')
+
+    try {
+      await onRecordScore(pilotId, Number(score))
+      setStatus('success')
+      setFeedback('SCORE TRANSMISSION COMPLETE')
+      setScore('')
+    } catch (error) {
+      setStatus('error')
+      setFeedback(error.message || 'SCORE TRANSMISSION FAILED')
+    }
   }
 
   return (
@@ -219,26 +267,26 @@ function ScoreEntry({ onClose }) {
         <span><VectorText text="NEW TRANSMISSION" /></span>
         <button type="button" onClick={onClose} aria-label="Close score entry"><VectorText text="X" /></button>
       </div>
-      <form onSubmit={(event) => event.preventDefault()}>
+      <form onSubmit={submitScore}>
         <fieldset className="pilot-field">
           <legend><VectorText text="PILOT" /></legend>
           <div className="pilot-select">
             <button className="pilot-select-trigger" type="button" onClick={() => setPilotMenuOpen((open) => !open)} aria-haspopup="listbox" aria-expanded={pilotMenuOpen}>
-              <VectorText text={pilot || 'SELECT PILOT'} />
+              <VectorText text={selectedPilot?.name || 'SELECT PILOT'} />
               <i aria-hidden="true" />
             </button>
             {pilotMenuOpen && (
               <div className="pilot-select-menu" role="listbox">
-                {['JGI', 'MKW', 'ACE'].map((name) => <button type="button" role="option" aria-selected={pilot === name} key={name} onClick={() => choosePilot(name)}><VectorText text={name} /></button>)}
+                {pilots.map((pilot) => <button type="button" role="option" aria-selected={pilotId === pilot.id} key={pilot.id} onClick={() => choosePilot(pilot)}><VectorText text={pilot.name} /></button>)}
                 <button type="button" role="option" aria-selected="false" onClick={() => { setAddingPilot(true); setPilotMenuOpen(false) }}><VectorText text="NEW PILOT" /></button>
               </div>
             )}
           </div>
-          {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} aria-label="New pilot name" autoFocus /><VectorText text={newPilot || 'PILOT NAME'} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={!newPilot} onClick={() => choosePilot(newPilot)}><VectorText text="ADD" /></button></div>}
+          {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} aria-label="New pilot name" autoFocus /><VectorText text={newPilot || 'PILOT NAME'} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={!newPilot || status === 'submitting'} onClick={addPilot}><VectorText text="ADD" /></button></div>}
         </fieldset>
         <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 8))} inputMode="numeric" aria-label="Score" /><VectorText text={score || '00000'} /><i className="vector-caret" /></span></label>
-        <button className="arcade-button" type="submit"><VectorText text="RECORD SCORE" /></button>
-        <p><VectorText text="VISUAL PROTOTYPE // SCORE TRANSMISSION OFFLINE" /></p>
+        <button className="arcade-button" type="submit" disabled={status === 'submitting'}><VectorText text={status === 'submitting' ? 'TRANSMITTING' : 'RECORD SCORE'} /></button>
+        <p className={`transmission-status ${status}`} aria-live="polite"><VectorText text={feedback || 'SELECT OR REGISTER PILOT'} /></p>
       </form>
     </div>
   )
@@ -246,6 +294,84 @@ function ScoreEntry({ onClose }) {
 
 export default function AsteroidsApp() {
   const [showEntry, setShowEntry] = useState(false)
+  const [pilots, setPilots] = useState([])
+  const [scores, setScores] = useState([])
+  const [dataStatus, setDataStatus] = useState('loading')
+
+  const loadScores = async () => {
+    const response = await fetch(apiUrl('/api/asteroids/scores?limit=10'))
+    if (!response.ok) throw new Error('SCORE LINK OFFLINE')
+    const entries = await response.json()
+    setScores(entries)
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadLeague() {
+      if (!apiBaseUrl) {
+        setDataStatus('error')
+        return
+      }
+
+      try {
+        const [pilotsResponse, scoresResponse] = await Promise.all([
+          fetch(apiUrl('/api/asteroids/pilots')),
+          fetch(apiUrl('/api/asteroids/scores?limit=10')),
+        ])
+
+        if (!pilotsResponse.ok || !scoresResponse.ok) throw new Error()
+        const [pilotEntries, scoreEntries] = await Promise.all([
+          pilotsResponse.json(),
+          scoresResponse.json(),
+        ])
+
+        if (!cancelled) {
+          setPilots(pilotEntries)
+          setScores(scoreEntries)
+          setDataStatus('ready')
+        }
+      } catch {
+        if (!cancelled) setDataStatus('error')
+      }
+    }
+
+    loadLeague()
+    return () => { cancelled = true }
+  }, [])
+
+  const createPilot = async (name) => {
+    const response = await fetch(apiUrl('/api/asteroids/pilots'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    })
+
+    if (!response.ok) {
+      const problem = await response.json().catch(() => null)
+      throw new Error(problem?.detail?.toUpperCase() || 'PILOT REGISTRATION FAILED')
+    }
+
+    const pilot = await response.json()
+    setPilots((current) => [...current, pilot].sort((left, right) => left.name.localeCompare(right.name)))
+    return pilot
+  }
+
+  const recordScore = async (pilotId, score) => {
+    const response = await fetch(apiUrl('/api/asteroids/scores'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pilotId, score }),
+    })
+
+    if (!response.ok) throw new Error('SCORE TRANSMISSION FAILED')
+    await loadScores()
+    setDataStatus('ready')
+  }
+
+  const lastTransmission = scores.length
+    ? scores.reduce((latest, entry) => entry.createdAtUtc > latest ? entry.createdAtUtc : latest, scores[0].createdAtUtc)
+    : null
 
   return (
     <div className="asteroids-app">
@@ -267,22 +393,25 @@ export default function AsteroidsApp() {
           <div className="leaderboard-shell">
             <div className="leaderboard-topline"><span><VectorText text="RANK" /></span><span><VectorText text="PILOT" /></span><span><VectorText text="SCORE" /></span><span><VectorText text="DATE" /></span></div>
             <ol className="leaderboard">
-              {initialScores.map((entry) => (
-                <li key={entry.rank} className={entry.rank === 1 ? 'champion' : ''}>
-                  <span className="rank"><VectorText text={`${entry.rank}.`} /></span>
-                  <span className="pilot"><VectorText text={entry.player} /></span>
+              {scores.map((entry, index) => (
+                <li key={entry.id} className={index === 0 ? 'champion' : ''}>
+                  <span className="rank"><VectorText text={`${index + 1}.`} /></span>
+                  <span className="pilot"><VectorText text={entry.pilotName} /></span>
                   <span className="score"><VectorText text={String(entry.score)} /></span>
-                  <span className="date"><VectorText text={entry.date} /></span>
+                  <span className="date"><VectorText text={formatScoreDate(entry.createdAtUtc)} /></span>
                 </li>
               ))}
+              {dataStatus === 'loading' && <li className="leaderboard-message"><VectorText text="LOADING SCORE TRANSMISSION" /></li>}
+              {dataStatus === 'error' && <li className="leaderboard-message"><VectorText text="SCORE LINK OFFLINE" /></li>}
+              {dataStatus === 'ready' && scores.length === 0 && <li className="leaderboard-message"><VectorText text="NO SCORES RECORDED" /></li>}
             </ol>
             <div className="leaderboard-actions">
-              <p><VectorText text="LAST TRANSMISSION 08.18.26 // 22:41" /></p>
-              <button className="arcade-button" type="button" onClick={() => setShowEntry((value) => !value)}><VectorText text="ENTER A SCORE" /></button>
+              <p><VectorText text={lastTransmission ? `LAST TRANSMISSION ${formatScoreDate(lastTransmission)}` : 'AWAITING FIRST TRANSMISSION'} /></p>
+              <button className="arcade-button" type="button" disabled={dataStatus === 'error'} onClick={() => setShowEntry((value) => !value)}><VectorText text="ENTER A SCORE" /></button>
             </div>
           </div>
 
-          {showEntry && <ScoreEntry onClose={() => setShowEntry(false)} />}
+          {showEntry && <ScoreEntry pilots={pilots} onClose={() => setShowEntry(false)} onCreatePilot={createPilot} onRecordScore={recordScore} />}
         </section>
       </main>
 
