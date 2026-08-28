@@ -153,6 +153,24 @@ function App() {
               <span className="project-link">View project <Arrow /></span>
             </div>
           </a>
+
+          <a className="project-card asteroid-project" href="/asteroids/">
+            <div className="project-preview asteroid-preview">
+              <span className="preview-label">In development</span>
+              <svg viewBox="0 0 180 100" aria-hidden="true">
+                <path d="m156 50-90-30 18 30-18 30 90-30Z" />
+                <path className="asteroid-trail trail-red" d="M78 38 6 15" />
+                <path className="asteroid-trail trail-yellow" d="M78 50 0 50" />
+                <path className="asteroid-trail trail-blue" d="M78 62 6 85" />
+              </svg>
+            </div>
+            <div className="project-details">
+              <div className="project-meta"><span>Leaderboard</span><span>Prototype</span></div>
+              <h3>Asteroids Home League</h3>
+              <p>A cabinet-inspired high-score tracker for an original Asteroids machine and the pilots brave enough to play it.</p>
+              <span className="project-link">Launch prototype <Arrow /></span>
+            </div>
+          </a>
         </section>
 
         <section className="about section" id="about" aria-labelledby="about-title">

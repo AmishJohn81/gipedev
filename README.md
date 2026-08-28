@@ -15,6 +15,12 @@ to the public URL of the deployed API before building the frontend.
 
 Create a production build with `npm run build`.
 
+The Asteroids Home League is available during local development at:
+
+```text
+http://localhost:5173/asteroids/
+```
+
 ## API
 
 The general GipeDev API is an ASP.NET Core application in `api/GipeDev.Api`.
@@ -30,6 +36,10 @@ The API endpoints are:
 - `GET /` — service information
 - `GET /health` — health check for hosting and monitoring
 - `POST /api/contact` — validate and store a contact submission
+- `GET /api/asteroids/pilots` — list registered pilot names
+- `POST /api/asteroids/pilots` — register a pilot name
+- `GET /api/asteroids/scores?limit=10` — return the highest scores
+- `POST /api/asteroids/scores` — record a score for an existing pilot
 
 A contact request has this shape:
 
@@ -45,6 +55,23 @@ A contact request has this shape:
 The optional `company` field is a honeypot and should remain hidden and empty in
 the user-facing form. Contact submissions are limited to five attempts per IP
 address every ten minutes.
+
+Asteroids pilots contain only an ID and a short display name; there are no
+accounts, passwords, email addresses, or other identifying fields. Pilot names
+must contain 1–10 letters or numbers and are unique without regard to case. A
+score request has this shape:
+
+```json
+{
+  "pilotId": "00000000-0000-0000-0000-000000000000",
+  "score": 48290
+}
+```
+
+Pilot and score writes share a limit of 30 attempts per IP address every ten
+minutes. The Asteroids tables live in the existing GipeDev PostgreSQL database,
+and the endpoints run in the existing API service, so no additional Render web
+service is required.
 
 ### Docker and Render
 
