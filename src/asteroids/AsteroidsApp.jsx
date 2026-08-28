@@ -255,7 +255,7 @@ export default function AsteroidsApp() {
 
       <header className="arcade-header">
         <a href="/" className="back-link" aria-label="Back to GipeDev"><VectorText text="< GIPEDEV" /></a>
-        <div className="cabinet-status"><i /><VectorText text="CABINET 001 ONLINE" /></div>
+        <a className="cabinet-status" href="https://www.youtube.com/watch?v=JiGjU-NnkfE" target="_blank" rel="noreferrer" aria-label="Watch the history of Asteroids on YouTube"><VectorText text="HISTORY OF ASTEROIDS >" /></a>
       </header>
 
       <main>
