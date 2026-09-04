@@ -141,21 +141,7 @@ function App() {
             <p>Practical tools built around real needs, explored with curiosity and crafted with care.</p>
           </div>
 
-          <a className="project-card" href="/5eTools/dev/">
-            <div className="project-preview">
-              <span className="preview-label">Featured project</span>
-              <div className="die" aria-hidden="true">20</div>
-              <div className="preview-lines"><i /><i /><i /></div>
-            </div>
-            <div className="project-details">
-              <div className="project-meta"><span>Web application</span><span>2026</span></div>
-              <h3>5eTools</h3>
-              <p>A growing collection of tools and resources designed to make tabletop sessions smoother and more enjoyable.</p>
-              <span className="project-link">View project <Arrow /></span>
-            </div>
-          </a>
-
-          <a className="project-card asteroid-project" href="/asteroids/">
+          <a className="project-card" href="/asteroids/">
             <div className="project-preview asteroid-preview">
               <span className="preview-label">In development</span>
               <svg viewBox="0 0 180 100" aria-hidden="true">
