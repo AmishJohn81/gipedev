@@ -95,8 +95,9 @@ function App() {
           <span>GipeDev</span>
         </a>
         <nav aria-label="Main navigation">
-          <a href="#work">Work</a>
-          <a href="#about">About</a>
+          <a className="nav-secondary" href="#work">Work</a>
+          <a className="nav-secondary" href="#about">About</a>
+          <a href="/john-gipe-resume.pdf" target="_blank" rel="noreferrer">Résumé</a>
           <a className="nav-cta" href="#contact">Get in touch</a>
         </nav>
       </header>
@@ -104,11 +105,11 @@ function App() {
       <main id="top">
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <p className="eyebrow"><span /> Independent software development</p>
-            <h1 id="hero-title">Thoughtful software.<br /><em>Built well.</em></h1>
+            <p className="eyebrow"><span /> Systems architecture &amp; software development</p>
+            <h1 id="hero-title">Thoughtful systems.<br /><em>Built to scale.</em></h1>
             <p className="hero-intro">
-              GipeDev turns useful ideas into simple, dependable digital experiences—
-              with an eye for the details that make software feel effortless.
+              I design and build dependable applications, integrations, and data platforms—
+              bringing more than a decade of technical leadership to complex business problems.
             </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#work">Explore the work <Arrow /></a>
@@ -174,15 +175,29 @@ function App() {
         </section>
 
         <section className="about section" id="about" aria-labelledby="about-title">
-          <p className="eyebrow">The approach</p>
+          <p className="eyebrow">Experience &amp; approach</p>
           <div className="about-grid">
-            <h2 id="about-title">Small details.<br /><em>Strong foundations.</em></h2>
+            <h2 id="about-title">Strong architecture.<br /><em>Practical outcomes.</em></h2>
             <div>
-              <p>Good software should be clear, useful, and pleasant to use. GipeDev is a home for projects built on those principles—from the first sketch to the final release.</p>
+              <p>I’m a Systems Architect and Software Development leader with 10+ years of experience building enterprise applications in financial services. I lead application architecture, integrations, data platforms, and developer growth while overseeing more than 40 production applications.</p>
               <div className="principles">
-                <span>01 <b>Keep it clear</b></span>
-                <span>02 <b>Build for people</b></span>
-                <span>03 <b>Stay curious</b></span>
+                <span>01 <b>Design for scale</b></span>
+                <span>02 <b>Connect the whole system</b></span>
+                <span>03 <b>Grow people and platforms</b></span>
+              </div>
+              <div className="resume-callout">
+                <div>
+                  <p className="resume-label">Experience &amp; background</p>
+                  <p>Explore my experience across solutions architecture, full-stack development, data platforms, and technical leadership.</p>
+                </div>
+                <div className="resume-actions">
+                  <a className="button button-primary" href="/john-gipe-resume.pdf" target="_blank" rel="noreferrer">
+                    View résumé <Arrow />
+                  </a>
+                  <a className="text-link" href="/john-gipe-resume.pdf" download="John-Gipe-Resume.pdf">
+                    Download PDF
+                  </a>
+                </div>
               </div>
             </div>
           </div>
