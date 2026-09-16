@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GipeDev.Api.Data;
 
-public sealed class GipeDevDbContext(DbContextOptions<GipeDevDbContext> options)
+public class GipeDevDbContext(DbContextOptions options)
     : DbContext(options)
 {
     public DbSet<ContactSubmission> ContactSubmissions => Set<ContactSubmission>();
@@ -46,3 +46,11 @@ public sealed class GipeDevDbContext(DbContextOptions<GipeDevDbContext> options)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+
+public sealed class SqliteGipeDevDbContext(
+    DbContextOptions<SqliteGipeDevDbContext> options)
+    : GipeDevDbContext(options);
+
+public sealed class PostgresGipeDevDbContext(
+    DbContextOptions<PostgresGipeDevDbContext> options)
+    : GipeDevDbContext(options);
