@@ -71,17 +71,17 @@ try
 
     var contacts = await CopyAsync(source, sourceTransaction, destination, transaction,
         "SELECT \"Id\", \"Name\", \"Email\", \"Subject\", \"Message\", \"CreatedAtUtc\" FROM contact_submissions ORDER BY \"CreatedAtUtc\", \"Id\"",
-        """INSERT INTO contact_submissions (Id, Name, Email, Subject, Message, CreatedAtUtc) VALUES (?, ?, ?, ?, ?, ?)""",
+        """INSERT INTO contact_submissions (Id, Name, Email, Subject, Message, CreatedAtUtc) VALUES ($p0, $p1, $p2, $p3, $p4, $p5)""",
         reader => new object[] { GuidText(reader, 0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4), TimestampText(reader, 5) });
 
     var pilots = await CopyAsync(source, sourceTransaction, destination, transaction,
         "SELECT \"Id\", \"Name\", \"NormalizedName\", \"CreatedAtUtc\" FROM asteroids_pilots ORDER BY \"CreatedAtUtc\", \"Id\"",
-        """INSERT INTO asteroids_pilots (Id, Name, NormalizedName, CreatedAtUtc) VALUES (?, ?, ?, ?)""",
+        """INSERT INTO asteroids_pilots (Id, Name, NormalizedName, CreatedAtUtc) VALUES ($p0, $p1, $p2, $p3)""",
         reader => new object[] { GuidText(reader, 0), reader.GetString(1), reader.GetString(2), TimestampText(reader, 3) });
 
     var scores = await CopyAsync(source, sourceTransaction, destination, transaction,
         "SELECT \"Id\", \"PilotId\", \"Score\", \"CreatedAtUtc\" FROM asteroids_scores ORDER BY \"CreatedAtUtc\", \"Id\"",
-        """INSERT INTO asteroids_scores (Id, PilotId, Score, CreatedAtUtc) VALUES (?, ?, ?, ?)""",
+        """INSERT INTO asteroids_scores (Id, PilotId, Score, CreatedAtUtc) VALUES ($p0, $p1, $p2, $p3)""",
         reader => new object[] { GuidText(reader, 0), GuidText(reader, 1), reader.GetInt32(2), TimestampText(reader, 3) });
 
     await transaction.CommitAsync();
