@@ -73,18 +73,34 @@ public sealed class AsteroidsController(GipeDevDbContext dbContext) : Controller
         [FromQuery, Range(1, 100)] int limit = 10,
         CancellationToken cancellationToken = default)
     {
-        var scores = await dbContext.AsteroidsScores
+        var scoreQuery = dbContext.AsteroidsScores
             .AsNoTracking()
-            .OrderByDescending(entry => entry.Score)
-            .ThenBy(entry => entry.CreatedAtUtc)
-            .Take(limit)
             .Select(entry => new AsteroidsScoreResponse(
                 entry.Id,
                 entry.PilotId,
                 entry.Pilot.Name,
                 entry.Score,
-                entry.CreatedAtUtc))
-            .ToListAsync(cancellationToken);
+                entry.CreatedAtUtc));
+
+        List<AsteroidsScoreResponse> scores;
+        if (dbContext.Database.IsSqlite())
+        {
+            // SQLite stores DateTimeOffset values but cannot use them in ORDER BY.
+            // Preserve the leaderboard's score/timestamp ordering in memory.
+            scores = (await scoreQuery.ToListAsync(cancellationToken))
+                .OrderByDescending(entry => entry.Score)
+                .ThenBy(entry => entry.CreatedAtUtc)
+                .Take(limit)
+                .ToList();
+        }
+        else
+        {
+            scores = await scoreQuery
+                .OrderByDescending(entry => entry.Score)
+                .ThenBy(entry => entry.CreatedAtUtc)
+                .Take(limit)
+                .ToListAsync(cancellationToken);
+        }
 
         return Ok(scores);
     }
