@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace GipeDev.Api.Data.Migrations
 {
-    [DbContext(typeof(GipeDevDbContext))]
-    partial class GipeDevDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(PostgresGipeDevDbContext))]
+    partial class PostgresGipeDevDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

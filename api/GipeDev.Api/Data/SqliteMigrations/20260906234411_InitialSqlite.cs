@@ -3,15 +3,15 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace GipeDev.Api.Data.Migrations
+namespace GipeDev.Api.Data.SqliteMigrations
 {
     /// <inheritdoc />
-    public partial class AddAsteroidsHighScores : Migration
+    public partial class InitialSqlite : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            if (ActiveProvider != "Npgsql.EntityFrameworkCore.PostgreSQL")
+            if (ActiveProvider != "Microsoft.EntityFrameworkCore.Sqlite")
             {
                 return;
             }
@@ -20,10 +20,10 @@ namespace GipeDev.Api.Data.Migrations
                 name: "asteroids_pilots",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    NormalizedName = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
+                    NormalizedName = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,13 +31,29 @@ namespace GipeDev.Api.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "contact_submissions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 254, nullable: false),
+                    Subject = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false),
+                    Message = table.Column<string>(type: "TEXT", maxLength: 5000, nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_contact_submissions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "asteroids_scores",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PilotId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Score = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PilotId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Score = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -70,18 +86,26 @@ namespace GipeDev.Api.Data.Migrations
                 name: "IX_asteroids_scores_Score",
                 table: "asteroids_scores",
                 column: "Score");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_contact_submissions_CreatedAtUtc",
+                table: "contact_submissions",
+                column: "CreatedAtUtc");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            if (ActiveProvider != "Npgsql.EntityFrameworkCore.PostgreSQL")
+            if (ActiveProvider != "Microsoft.EntityFrameworkCore.Sqlite")
             {
                 return;
             }
 
             migrationBuilder.DropTable(
                 name: "asteroids_scores");
+
+            migrationBuilder.DropTable(
+                name: "contact_submissions");
 
             migrationBuilder.DropTable(
                 name: "asteroids_pilots");

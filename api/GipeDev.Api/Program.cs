@@ -5,11 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("GipeDev")
-    ?? throw new InvalidOperationException("ConnectionStrings:GipeDev is required.");
-
 builder.Services.AddControllers();
-builder.Services.AddDbContext<GipeDevDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDatabaseProvider(builder.Configuration);
 builder.Services.AddHealthChecks();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>

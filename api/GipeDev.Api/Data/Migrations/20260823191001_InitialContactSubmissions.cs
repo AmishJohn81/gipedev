@@ -11,6 +11,11 @@ namespace GipeDev.Api.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            if (ActiveProvider != "Npgsql.EntityFrameworkCore.PostgreSQL")
+            {
+                return;
+            }
+
             migrationBuilder.CreateTable(
                 name: "contact_submissions",
                 columns: table => new
@@ -36,6 +41,11 @@ namespace GipeDev.Api.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            if (ActiveProvider != "Npgsql.EntityFrameworkCore.PostgreSQL")
+            {
+                return;
+            }
+
             migrationBuilder.DropTable(
                 name: "contact_submissions");
         }

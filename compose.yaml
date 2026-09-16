@@ -5,26 +5,12 @@ services:
       dockerfile: api/GipeDev.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__GipeDev: Host=database;Port=5432;Database=gipedev;Username=gipedev;Password=gipedev
+      DatabaseProvider: Sqlite
+      ConnectionStrings__GipeDev: Data Source=/app/data/gipedev.db;Default Timeout=30
     ports:
       - "10000:10000"
-    depends_on:
-      database:
-        condition: service_healthy
-
-  database:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: gipedev
-      POSTGRES_USER: gipedev
-      POSTGRES_PASSWORD: gipedev
     volumes:
-      - gipedev-postgres:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U gipedev -d gipedev"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      - gipedev-data:/app/data
 
 volumes:
-  gipedev-postgres:
+  gipedev-data:

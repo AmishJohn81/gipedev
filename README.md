@@ -69,9 +69,48 @@ score request has this shape:
 ```
 
 Pilot and score writes share a limit of 30 attempts per IP address every ten
-minutes. The Asteroids tables live in the existing GipeDev PostgreSQL database,
-and the endpoints run in the existing API service, so no additional Render web
-service is required.
+minutes. Contact submissions, pilots, and scores use the configured EF Core
+database provider.
+
+### Database provider
+
+The API supports SQLite and PostgreSQL through `DatabaseProviderFactory`. Set
+the provider and connection string in `appsettings.json` or with environment
+variables:
+
+```text
+# SQLite (default/local and the intended Render configuration)
+DatabaseProvider=Sqlite
+ConnectionStrings__GipeDev=Data Source=/app/data/gipedev.db;Default Timeout=30
+
+# PostgreSQL (for rollback or a staged migration)
+DatabaseProvider=PostgreSql
+ConnectionStrings__GipeDev=Host=...;Database=...;Username=...;Password=...;SSL Mode=Require
+```
+
+`Postgres` is also accepted as a provider name. The API applies only the
+migrations for the active provider, so an existing PostgreSQL database and a
+new SQLite file can safely use the same application build.
+
+PostgreSQL and SQLite use separate EF Core context types and model snapshots.
+When the shared entity model changes, generate and review one migration for
+each provider:
+
+```bash
+dotnet ef migrations add MigrationName \
+  --project api/GipeDev.Api \
+  --context PostgresGipeDevDbContext \
+  --output-dir Data/Migrations
+
+dotnet ef migrations add MigrationName \
+  --project api/GipeDev.Api \
+  --context SqliteGipeDevDbContext \
+  --output-dir Data/SqliteMigrations
+```
+
+Set `DatabaseProvider` and `ConnectionStrings__GipeDev` for the provider being
+generated. Keeping both migrations in the same change ensures either database
+can be selected later without schema drift.
 
 ### Docker and Render
 
@@ -82,7 +121,7 @@ docker build -f api/GipeDev.Api/Dockerfile -t gipedev-api .
 docker run --rm -p 10000:10000 gipedev-api
 ```
 
-To run the API and a local PostgreSQL database together:
+To run the API with a persistent local SQLite Docker volume:
 
 ```bash
 docker compose up --build
@@ -91,13 +130,13 @@ docker compose up --build
 ### Stopping local development
 
 Stop the React development server in its terminal with `Ctrl+C`, then stop the
-API and PostgreSQL containers from the repository root:
+API container from the repository root:
 
 ```bash
 docker compose down
 ```
 
-This removes the containers and local Docker network while preserving PostgreSQL
+This removes the container and local Docker network while preserving SQLite
 data. Confirm that all services are stopped with:
 
 ```bash
@@ -112,6 +151,46 @@ docker compose down --volumes
 
 For a Render Web Service, select the Docker runtime and set the Dockerfile path to
 `api/GipeDev.Api/Dockerfile`. The container listens on port `10000`; use `/health`
-as Render's health-check path. Attach a Render PostgreSQL database and set
-`ConnectionStrings__GipeDev` to its internal connection string expressed as an
-Npgsql connection string.
+as Render's health-check path. Use a paid service, attach a persistent disk at
+`/app/data`, and configure the SQLite environment variables shown above. Only
+files under the disk mount survive deploys.
+
+### One-time Render PostgreSQL transfer
+
+The image includes a purpose-built transfer tool. It reads all three PostgreSQL
+tables in one repeatable-read snapshot, creates and migrates a temporary SQLite
+database, copies IDs and timestamps unchanged, verifies row counts and foreign
+keys, then atomically installs the finished file. A failure leaves the existing
+SQLite destination untouched.
+
+Use this cutover sequence before the Render PostgreSQL database expires:
+
+1. Take and retain a final PostgreSQL backup (`pg_dump` in custom format).
+2. Deploy this build with `DatabaseProvider=PostgreSql` first and confirm the API
+   still reads and writes the existing database.
+3. Upgrade the web service and attach its persistent disk at `/app/data`. Keep
+   the API on PostgreSQL during this deploy.
+4. Add the old database's internal connection string as the secret environment
+   variable `SOURCE_POSTGRES_CONNECTION_STRING`.
+5. Enable Render maintenance mode. This keeps the service running for its Shell
+   while preventing new public contact, pilot, or score writes.
+6. In the Render Shell, run:
+
+   ```bash
+   dotnet /app/transfer/GipeDev.DataTransfer.dll --destination /app/data/gipedev.db
+   ```
+
+   If a previous empty/test SQLite file exists, inspect or download it first,
+   then rerun with the explicit `--replace` flag. The tool prints the copied
+   count for contacts, pilots, and scores.
+7. Set `DatabaseProvider=Sqlite` and
+   `ConnectionStrings__GipeDev=Data Source=/app/data/gipedev.db;Default Timeout=30`,
+   then deploy. Verify `/health`, the pilot list, and the high-score list before
+   disabling maintenance mode.
+8. Submit one controlled contact and score, confirm they persist through a
+   manual redeploy, remove `SOURCE_POSTGRES_CONNECTION_STRING`, and retain the
+   PostgreSQL backup until the rollback window closes.
+
+For rollback during that window, restore `DatabaseProvider=PostgreSql` and its
+old connection string. Do not accept writes on both databases at once: the
+transfer is a snapshot, not continuous replication.

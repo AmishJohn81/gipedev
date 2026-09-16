@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GipeDev.Api.Data.Migrations
 {
     [DbContext(typeof(PostgresGipeDevDbContext))]
-    [Migration("20260828005814_AddAsteroidsHighScores")]
-    partial class AddAsteroidsHighScores
+    [Migration("20260916002042_PostgresSnapshotBaseline")]
+    partial class PostgresSnapshotBaseline
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

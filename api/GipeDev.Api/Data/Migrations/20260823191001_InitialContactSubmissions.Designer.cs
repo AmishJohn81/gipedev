@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace GipeDev.Api.Data.Migrations
 {
-    [DbContext(typeof(GipeDevDbContext))]
+    [DbContext(typeof(PostgresGipeDevDbContext))]
     [Migration("20260823191001_InitialContactSubmissions")]
     partial class InitialContactSubmissions
     {
