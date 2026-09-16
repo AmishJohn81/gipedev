@@ -57,14 +57,14 @@ try
     await using var sourceTransaction = await source.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
     var options = new DbContextOptionsBuilder<SqliteGipeDevDbContext>()
-        .UseSqlite($"Data Source={temporaryPath}")
+        .UseSqlite($"Data Source={temporaryPath};Pooling=False")
         .Options;
     await using (var db = new SqliteGipeDevDbContext(options))
     {
         await db.Database.MigrateAsync();
     }
 
-    await using var destination = new SqliteConnection($"Data Source={temporaryPath}");
+    await using var destination = new SqliteConnection($"Data Source={temporaryPath};Pooling=False");
     await destination.OpenAsync();
     await ExecuteAsync(destination, "PRAGMA foreign_keys = ON;");
     await using var transaction = await destination.BeginTransactionAsync();
@@ -96,9 +96,17 @@ try
     await VerifyCountAsync(destination, "contact_submissions", contacts);
     await VerifyCountAsync(destination, "asteroids_pilots", pilots);
     await VerifyCountAsync(destination, "asteroids_scores", scores);
+
+    // EF Core uses WAL mode while migrating SQLite. Checkpoint all committed
+    // pages into the main file and return to rollback journaling before the
+    // atomic move; otherwise moving only the main file loses WAL-resident rows.
+    await ExecuteAsync(destination, "PRAGMA wal_checkpoint(TRUNCATE);");
+    await ExecuteAsync(destination, "PRAGMA journal_mode=DELETE;");
     await destination.CloseAsync();
 
     File.Move(temporaryPath, destinationPath, replace);
+    DeleteIfExists(destinationPath + "-wal");
+    DeleteIfExists(destinationPath + "-shm");
     Console.WriteLine($"Transfer complete: {contacts} contacts, {pilots} pilots, {scores} scores.");
     Console.WriteLine($"SQLite database: {destinationPath}");
     return 0;
@@ -110,10 +118,9 @@ catch (Exception exception)
 }
 finally
 {
-    if (File.Exists(temporaryPath))
-    {
-        File.Delete(temporaryPath);
-    }
+    DeleteIfExists(temporaryPath);
+    DeleteIfExists(temporaryPath + "-wal");
+    DeleteIfExists(temporaryPath + "-shm");
 }
 
 static async Task<long> CopyAsync(
@@ -185,4 +192,12 @@ static int Fail(string message)
     Console.Error.WriteLine(message);
     Console.Error.WriteLine("Usage: dotnet GipeDev.DataTransfer.dll [--source CONNECTION] [--destination PATH] [--replace]");
     return 2;
+}
+
+static void DeleteIfExists(string path)
+{
+    if (File.Exists(path))
+    {
+        File.Delete(path);
+    }
 }
