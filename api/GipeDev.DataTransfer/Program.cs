@@ -48,7 +48,11 @@ var temporaryPath = destinationPath + $".import-{Guid.NewGuid():N}.tmp";
 
 try
 {
-    await using var source = new NpgsqlConnection(sourceConnectionString);
+    var sourceConnection = new NpgsqlConnectionStringBuilder(sourceConnectionString)
+    {
+        GssEncryptionMode = GssEncryptionMode.Disable
+    };
+    await using var source = new NpgsqlConnection(sourceConnection.ConnectionString);
     await source.OpenAsync();
     await using var sourceTransaction = await source.BeginTransactionAsync(IsolationLevel.RepeatableRead);
 
@@ -66,17 +70,17 @@ try
     await using var transaction = await destination.BeginTransactionAsync();
 
     var contacts = await CopyAsync(source, sourceTransaction, destination, transaction,
-        """SELECT "Id", "Name", "Email", "Subject", "Message", "CreatedAtUtc" FROM contact_submissions ORDER BY "CreatedAtUtc", "Id""" ,
+        "SELECT \"Id\", \"Name\", \"Email\", \"Subject\", \"Message\", \"CreatedAtUtc\" FROM contact_submissions ORDER BY \"CreatedAtUtc\", \"Id\"",
         """INSERT INTO contact_submissions (Id, Name, Email, Subject, Message, CreatedAtUtc) VALUES (?, ?, ?, ?, ?, ?)""",
         reader => new object[] { GuidText(reader, 0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4), TimestampText(reader, 5) });
 
     var pilots = await CopyAsync(source, sourceTransaction, destination, transaction,
-        """SELECT "Id", "Name", "NormalizedName", "CreatedAtUtc" FROM asteroids_pilots ORDER BY "CreatedAtUtc", "Id""",
+        "SELECT \"Id\", \"Name\", \"NormalizedName\", \"CreatedAtUtc\" FROM asteroids_pilots ORDER BY \"CreatedAtUtc\", \"Id\"",
         """INSERT INTO asteroids_pilots (Id, Name, NormalizedName, CreatedAtUtc) VALUES (?, ?, ?, ?)""",
         reader => new object[] { GuidText(reader, 0), reader.GetString(1), reader.GetString(2), TimestampText(reader, 3) });
 
     var scores = await CopyAsync(source, sourceTransaction, destination, transaction,
-        """SELECT "Id", "PilotId", "Score", "CreatedAtUtc" FROM asteroids_scores ORDER BY "CreatedAtUtc", "Id""",
+        "SELECT \"Id\", \"PilotId\", \"Score\", \"CreatedAtUtc\" FROM asteroids_scores ORDER BY \"CreatedAtUtc\", \"Id\"",
         """INSERT INTO asteroids_scores (Id, PilotId, Score, CreatedAtUtc) VALUES (?, ?, ?, ?)""",
         reader => new object[] { GuidText(reader, 0), GuidText(reader, 1), reader.GetInt32(2), TimestampText(reader, 3) });
 
