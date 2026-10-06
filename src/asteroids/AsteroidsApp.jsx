@@ -209,7 +209,7 @@ function IntroFlyby() {
   )
 }
 
-function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
+function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore, panelRef }) {
   const [pilotId, setPilotId] = useState('')
   const [score, setScore] = useState('')
   const [pilotMenuOpen, setPilotMenuOpen] = useState(false)
@@ -257,11 +257,25 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
       return
     }
 
+    const scoreValue = Number(score)
+
+    if (scoreValue < 10) {
+      setStatus('error')
+      setFeedback('SCORE MUST BE AT LEAST 10')
+      return
+    }
+
+    if (scoreValue % 10 !== 0) {
+      setStatus('error')
+      setFeedback('SCORE MUST BE DIVISIBLE BY 10')
+      return
+    }
+
     setStatus('submitting')
     setFeedback('TRANSMITTING SCORE')
 
     try {
-      await onRecordScore(pilotId, Number(score))
+      await onRecordScore(pilotId, scoreValue)
       setStatus('success')
       setFeedback('SCORE TRANSMISSION COMPLETE')
       setScore('')
@@ -272,7 +286,7 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
   }
 
   return (
-    <div className="score-entry-panel">
+    <div className="score-entry-panel" ref={panelRef}>
       <div className="panel-header">
         <span><VectorText text="NEW TRANSMISSION" /></span>
         <button type="button" onClick={onClose} aria-label="Close score entry"><VectorText text="X" /></button>
@@ -294,7 +308,7 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
           </div>
           {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z ]/g, '').slice(0, 3))} aria-label="Three-character pilot initials" maxLength="3" autoFocus /><VectorText text={newPilot} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={newPilot.length !== 3 || !/[A-Z]/.test(newPilot) || status === 'submitting'} onClick={addPilot}><VectorText text="ADD" /></button></div>}
         </fieldset>
-        <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" max="999999" aria-label="Score" /><VectorText text={score} /><i className="vector-caret" /></span></label>
+        <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" max="999990" aria-label="Score" /><VectorText text={score} /><i className="vector-caret" /></span></label>
         <button className="arcade-button" type="submit" disabled={status === 'submitting'}><VectorText text={status === 'submitting' ? 'TRANSMITTING' : 'RECORD SCORE'} /></button>
         <p className={`transmission-status ${status}`} aria-live="polite"><VectorText text={feedback || 'SELECT OR REGISTER PILOT'} /></p>
       </form>
@@ -303,6 +317,9 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
 }
 
 export default function AsteroidsApp() {
+  const leaderboardRef = useRef(null)
+  const scoreEntryRef = useRef(null)
+  const hasOpenedEntryRef = useRef(false)
   const [showEntry, setShowEntry] = useState(false)
   const [pilots, setPilots] = useState([])
   const [scores, setScores] = useState([])
@@ -349,6 +366,22 @@ export default function AsteroidsApp() {
     loadLeague()
     return () => { cancelled = true }
   }, [])
+
+  useEffect(() => {
+    if (!showEntry && !hasOpenedEntryRef.current) return
+    if (showEntry) hasOpenedEntryRef.current = true
+
+    const frame = requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const target = showEntry ? scoreEntryRef.current : leaderboardRef.current
+      target?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: showEntry ? 'start' : 'end',
+      })
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [showEntry])
 
   const createPilot = async (name) => {
     const response = await fetch(apiUrl('/api/asteroids/pilots'), {
@@ -398,9 +431,9 @@ export default function AsteroidsApp() {
         <section className="score-hero">
           <div className="hero-kicker"><VectorText text="ORIGINAL CABINET // HOME LEAGUE" /></div>
           <h1><span data-text="ASTEROIDS">Asteroids</span><b><VectorText text="HIGH SCORES" label="High Scores" /></b></h1>
-          <div className="hero-subtitle"><VectorText text="ONE MACHINE // A HANDFUL OF PILOTS // NO EXTRA LIVES" /></div>
+          <div className="hero-subtitle"><VectorText text="ONE PILOT // FOUR LIVES // EXTRA LIFE EVERY 10K" /></div>
 
-          <div className="leaderboard-shell">
+          <div className="leaderboard-shell" ref={leaderboardRef}>
             <ol className="leaderboard">
               {scores.map((entry, index) => (
                 <li key={entry.id} className={index === 0 ? 'champion' : ''}>
@@ -420,7 +453,7 @@ export default function AsteroidsApp() {
             </div>
           </div>
 
-          {showEntry && <ScoreEntry pilots={pilots} onClose={() => setShowEntry(false)} onCreatePilot={createPilot} onRecordScore={recordScore} />}
+          {showEntry && <ScoreEntry pilots={pilots} onClose={() => setShowEntry(false)} onCreatePilot={createPilot} onRecordScore={recordScore} panelRef={scoreEntryRef} />}
         </section>
       </main>
 

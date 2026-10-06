@@ -59,8 +59,8 @@ address every ten minutes.
 Asteroids pilots contain only an ID and three-character initials; there are no
 accounts, passwords, email addresses, or other identifying fields. Pilot initials
 may contain letters and spaces, must include at least one letter, and are unique
-without regard to case. Scores must be between 1 and 999,999. A score request
-has this shape:
+without regard to case. Scores must be divisible by 10 and fall between 10 and
+999,990. A score request has this shape:
 
 ```json
 {
