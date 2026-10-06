@@ -6,6 +6,6 @@ public sealed class CreateAsteroidsScoreRequest
 {
     public Guid PilotId { get; init; }
 
-    [Range(1, 99_999_999)]
+    [Range(1, 999_999)]
     public int Score { get; init; }
 }

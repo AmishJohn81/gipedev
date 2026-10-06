@@ -35,7 +35,7 @@ public sealed class AsteroidsController(GipeDevDbContext dbContext) : Controller
         CreateAsteroidsPilotRequest request,
         CancellationToken cancellationToken)
     {
-        var name = request.Name.Trim().ToUpperInvariant();
+        var name = request.Name.ToUpperInvariant();
 
         if (await dbContext.AsteroidsPilots.AnyAsync(
                 pilot => pilot.NormalizedName == name, cancellationToken))

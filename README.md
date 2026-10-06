@@ -56,10 +56,11 @@ The optional `company` field is a honeypot and should remain hidden and empty in
 the user-facing form. Contact submissions are limited to five attempts per IP
 address every ten minutes.
 
-Asteroids pilots contain only an ID and a short display name; there are no
-accounts, passwords, email addresses, or other identifying fields. Pilot names
-must contain 1–10 letters or numbers and are unique without regard to case. A
-score request has this shape:
+Asteroids pilots contain only an ID and three-character initials; there are no
+accounts, passwords, email addresses, or other identifying fields. Pilot initials
+may contain letters and spaces, must include at least one letter, and are unique
+without regard to case. Scores must be between 1 and 999,999. A score request
+has this shape:
 
 ```json
 {

@@ -7,11 +7,15 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 const apiUrl = (path) => `${apiBaseUrl.replace(/\/$/, '')}${path}`
 
 function formatScoreDate(value) {
-  return new Intl.DateTimeFormat('en-US', {
+  const date = new Date(value)
+  const month = new Intl.DateTimeFormat('en-US', {
     month: 'short',
-    day: '2-digit',
     timeZone: 'UTC',
-  }).format(new Date(value)).toUpperCase()
+  }).format(date).toUpperCase()
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  const year = String(date.getUTCFullYear())
+
+  return `${month} ${day} ${year}`
 }
 
 function VectorShip({ className = '' }) {
@@ -224,6 +228,12 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
   }
 
   const addPilot = async () => {
+    if (newPilot.length !== 3 || !/[A-Z]/.test(newPilot)) {
+      setStatus('error')
+      setFeedback('ENTER THREE INITIALS WITH AT LEAST ONE LETTER')
+      return
+    }
+
     setStatus('submitting')
     setFeedback('')
 
@@ -282,9 +292,9 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
               </div>
             )}
           </div>
-          {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} aria-label="New pilot name" autoFocus /><VectorText text={newPilot || 'PILOT NAME'} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={!newPilot || status === 'submitting'} onClick={addPilot}><VectorText text="ADD" /></button></div>}
+          {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z ]/g, '').slice(0, 3))} aria-label="Three-character pilot initials" maxLength="3" autoFocus /><VectorText text={newPilot} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={newPilot.length !== 3 || !/[A-Z]/.test(newPilot) || status === 'submitting'} onClick={addPilot}><VectorText text="ADD" /></button></div>}
         </fieldset>
-        <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 8))} inputMode="numeric" aria-label="Score" /><VectorText text={score || '00000'} /><i className="vector-caret" /></span></label>
+        <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" max="999999" aria-label="Score" /><VectorText text={score} /><i className="vector-caret" /></span></label>
         <button className="arcade-button" type="submit" disabled={status === 'submitting'}><VectorText text={status === 'submitting' ? 'TRANSMITTING' : 'RECORD SCORE'} /></button>
         <p className={`transmission-status ${status}`} aria-live="polite"><VectorText text={feedback || 'SELECT OR REGISTER PILOT'} /></p>
       </form>
@@ -391,7 +401,6 @@ export default function AsteroidsApp() {
           <div className="hero-subtitle"><VectorText text="ONE MACHINE // A HANDFUL OF PILOTS // NO EXTRA LIVES" /></div>
 
           <div className="leaderboard-shell">
-            <div className="leaderboard-topline"><span><VectorText text="RANK" /></span><span><VectorText text="PILOT" /></span><span><VectorText text="SCORE" /></span><span><VectorText text="DATE" /></span></div>
             <ol className="leaderboard">
               {scores.map((entry, index) => (
                 <li key={entry.id} className={index === 0 ? 'champion' : ''}>
