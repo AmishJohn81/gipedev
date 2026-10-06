@@ -19,6 +19,7 @@ The Asteroids Home League is available during local development at:
 
 ```text
 http://localhost:5173/asteroids/
+http://localhost:5173/asteroids/scores/
 ```
 
 ## API
@@ -39,6 +40,7 @@ The API endpoints are:
 - `GET /api/asteroids/pilots` — list registered pilot names
 - `POST /api/asteroids/pilots` — register a pilot name
 - `GET /api/asteroids/scores?limit=10` — return the highest scores
+- `GET /api/asteroids/scores/archive` — search, filter, sort, and page through every score
 - `POST /api/asteroids/scores` — record a score for an existing pilot
 
 A contact request has this shape:

@@ -27,7 +27,7 @@ function VectorShip({ className = '' }) {
   )
 }
 
-function ShipCursor() {
+export function ShipCursor() {
   const cursorRef = useRef(null)
   const shotLayerRef = useRef(null)
   const fireTimer = useRef(null)
@@ -45,6 +45,8 @@ function ShipCursor() {
     if (!finePointer || reducedMotion) return undefined
 
     document.body.classList.add('ship-cursor-active')
+    const cursorNoseOffset = 15.25
+    const projectileLead = 7
     let animationFrame
     let disposed = false
 
@@ -77,8 +79,8 @@ function ShipCursor() {
       const viewport = shotLayerRef.current.getBoundingClientRect()
       const viewportWidth = viewport.width || document.documentElement.clientWidth
       const viewportHeight = viewport.height || document.documentElement.clientHeight
-      const startX = current.current.x + Math.cos(angle) * 22
-      const startY = current.current.y + Math.sin(angle) * 22
+      const startX = current.current.x + Math.cos(angle) * projectileLead
+      const startY = current.current.y + Math.sin(angle) * projectileLead
       const shot = document.createElement('i')
       shot.className = 'cursor-projectile'
       shotLayerRef.current.appendChild(shot)
@@ -123,12 +125,15 @@ function ShipCursor() {
     }
 
     const animate = () => {
-      current.current.x += (target.current.x - current.current.x) * 0.28
-      current.current.y += (target.current.y - current.current.y) * 0.28
+      current.current.x = target.current.x
+      current.current.y = target.current.y
       let angleDelta = ((target.current.angle - current.current.angle + 540) % 360) - 180
       current.current.angle += angleDelta * 0.22
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0) rotate(${current.current.angle}deg)`
+        const angle = current.current.angle * Math.PI / 180
+        const cursorX = current.current.x - Math.cos(angle) * cursorNoseOffset
+        const cursorY = current.current.y - Math.sin(angle) * cursorNoseOffset
+        cursorRef.current.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) rotate(${current.current.angle}deg)`
       }
       animationFrame = requestAnimationFrame(animate)
     }
@@ -160,7 +165,7 @@ function ShipCursor() {
   )
 }
 
-function CabinetBackdrop() {
+export function CabinetBackdrop() {
   return (
     <div className="cabinet-backdrop" aria-hidden="true">
       <svg className="space-lines" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
@@ -424,7 +429,7 @@ export default function AsteroidsApp() {
 
       <header className="arcade-header">
         <a href="/" className="back-link" aria-label="Back to GipeDev"><VectorText text="< GIPEDEV" /></a>
-        <a className="cabinet-status" href="https://www.youtube.com/watch?v=JiGjU-NnkfE" target="_blank" rel="noreferrer" aria-label="Watch the history of Asteroids on YouTube"><VectorText text="HISTORY OF ASTEROIDS >" /></a>
+        <a className="cabinet-status" href="/asteroids/scores/" aria-label="View the complete score archive"><VectorText text="SCORE ARCHIVE >" /></a>
       </header>
 
       <main>
@@ -452,6 +457,8 @@ export default function AsteroidsApp() {
               <button className="arcade-button" type="button" disabled={dataStatus === 'error'} onClick={() => setShowEntry((value) => !value)}><VectorText text="ENTER A SCORE" /></button>
             </div>
           </div>
+
+          <a className="archive-launch" href="/asteroids/scores/"><VectorText text="VIEW COMPLETE SCORE ARCHIVE >" /></a>
 
           {showEntry && <ScoreEntry pilots={pilots} onClose={() => setShowEntry(false)} onCreatePilot={createPilot} onRecordScore={recordScore} panelRef={scoreEntryRef} />}
         </section>

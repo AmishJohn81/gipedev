@@ -143,6 +143,91 @@ public sealed class AsteroidsController(GipeDevDbContext dbContext) : Controller
             score.Id, pilot.Id, pilot.Name, score.Score, score.CreatedAtUtc);
         return Created($"/api/asteroids/scores/{score.Id}", response);
     }
+
+    [HttpGet("scores/archive")]
+    [ProducesResponseType<AsteroidsScoreArchiveResponse>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<AsteroidsScoreArchiveResponse>> GetScoreArchive(
+        [FromQuery] AsteroidsScoreArchiveQuery request,
+        CancellationToken cancellationToken)
+    {
+        var query = dbContext.AsteroidsScores.AsNoTracking();
+
+        if (request.PilotId.HasValue)
+        {
+            query = query.Where(entry => entry.PilotId == request.PilotId.Value);
+        }
+
+        if (request.MinimumScore.HasValue)
+        {
+            query = query.Where(entry => entry.Score >= request.MinimumScore.Value);
+        }
+
+        if (request.MaximumScore.HasValue)
+        {
+            query = query.Where(entry => entry.Score <= request.MaximumScore.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.ToUpperInvariant();
+            query = query.Where(entry => entry.Pilot.NormalizedName.Contains(search));
+        }
+
+        var scores = await query
+            .Select(entry => new AsteroidsScoreResponse(
+                entry.Id,
+                entry.PilotId,
+                entry.Pilot.Name,
+                entry.Score,
+                entry.CreatedAtUtc))
+            .ToListAsync(cancellationToken);
+
+        var overallRanks = (await dbContext.AsteroidsScores
+                .AsNoTracking()
+                .Select(entry => new { entry.Id, entry.Score, entry.CreatedAtUtc })
+                .ToListAsync(cancellationToken))
+            .OrderByDescending(entry => entry.Score)
+            .ThenBy(entry => entry.CreatedAtUtc)
+            .ThenBy(entry => entry.Id)
+            .Select((entry, index) => new { entry.Id, Rank = index + 1 })
+            .ToDictionary(entry => entry.Id, entry => entry.Rank);
+
+        var archiveScores = scores
+            .Select(entry => new AsteroidsScoreArchiveItemResponse(
+                entry.Id,
+                entry.PilotId,
+                entry.PilotName,
+                entry.Score,
+                entry.CreatedAtUtc,
+                overallRanks[entry.Id]))
+            .ToList();
+
+        var ascending = request.SortDirection == "asc";
+        var orderedScores = request.SortBy switch
+        {
+            "rank" when ascending => archiveScores.OrderBy(entry => entry.OverallRank),
+            "rank" => archiveScores.OrderByDescending(entry => entry.OverallRank),
+            "pilot" when ascending => archiveScores.OrderBy(entry => entry.PilotName).ThenBy(entry => entry.OverallRank),
+            "pilot" => archiveScores.OrderByDescending(entry => entry.PilotName).ThenBy(entry => entry.OverallRank),
+            "score" when ascending => archiveScores.OrderBy(entry => entry.Score).ThenBy(entry => entry.OverallRank),
+            "score" => archiveScores.OrderByDescending(entry => entry.Score).ThenBy(entry => entry.OverallRank),
+            "date" when ascending => archiveScores.OrderBy(entry => entry.CreatedAtUtc),
+            _ => archiveScores.OrderByDescending(entry => entry.CreatedAtUtc)
+        };
+
+        var totalCount = archiveScores.Count;
+        var items = orderedScores
+            .Skip((request.Page - 1) * request.PageSize)
+            .Take(request.PageSize)
+            .ToList();
+
+        return Ok(new AsteroidsScoreArchiveResponse(
+            items,
+            totalCount,
+            request.Page,
+            request.PageSize,
+            Math.Max(1, (int)Math.Ceiling(totalCount / (double)request.PageSize))));
+    }
 }
 
 public sealed record AsteroidsPilotResponse(Guid Id, string Name);
@@ -153,3 +238,18 @@ public sealed record AsteroidsScoreResponse(
     string PilotName,
     int Score,
     DateTimeOffset CreatedAtUtc);
+
+public sealed record AsteroidsScoreArchiveResponse(
+    IReadOnlyList<AsteroidsScoreArchiveItemResponse> Items,
+    int TotalCount,
+    int Page,
+    int PageSize,
+    int TotalPages);
+
+public sealed record AsteroidsScoreArchiveItemResponse(
+    Guid Id,
+    Guid PilotId,
+    string PilotName,
+    int Score,
+    DateTimeOffset CreatedAtUtc,
+    int OverallRank);
