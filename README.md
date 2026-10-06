@@ -197,3 +197,21 @@ Use this cutover sequence before the Render PostgreSQL database expires:
 For rollback during that window, restore `DatabaseProvider=PostgreSql` and its
 old connection string. Do not accept writes on both databases at once: the
 transfer is a snapshot, not continuous replication.
+
+### Resetting production Asteroids data
+
+The transfer utility also provides a narrowly scoped SQLite reset mode. It
+creates a SQLite-native timestamped backup, deletes scores and pilots in one
+transaction, preserves contact submissions and migrations, and verifies the
+result. Enable Render maintenance mode first, then run this in the API service
+Shell:
+
+```bash
+dotnet /app/transfer/GipeDev.DataTransfer.dll \
+  --clear-asteroids \
+  --destination /app/data/gipedev.db \
+  --confirm-clear
+```
+
+The command prints the deleted row counts and backup path. Disable maintenance
+mode only after verifying that both Asteroids pages show an empty score list.

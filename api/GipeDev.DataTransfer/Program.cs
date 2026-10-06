@@ -10,6 +10,8 @@ const string sourceVariable = "SOURCE_POSTGRES_CONNECTION_STRING";
 var sourceConnectionString = Environment.GetEnvironmentVariable(sourceVariable);
 var destinationPath = "/app/data/gipedev.db";
 var replace = false;
+var clearAsteroids = false;
+var confirmClear = false;
 
 for (var index = 0; index < args.Length; index++)
 {
@@ -24,9 +26,22 @@ for (var index = 0; index < args.Length; index++)
         case "--replace":
             replace = true;
             break;
+        case "--clear-asteroids":
+            clearAsteroids = true;
+            break;
+        case "--confirm-clear":
+            confirmClear = true;
+            break;
         default:
             return Fail($"Unknown or incomplete argument: {args[index]}");
     }
+}
+
+destinationPath = Path.GetFullPath(destinationPath);
+
+if (clearAsteroids)
+{
+    return await ClearAsteroidsAsync(destinationPath, confirmClear);
 }
 
 if (string.IsNullOrWhiteSpace(sourceConnectionString))
@@ -34,7 +49,6 @@ if (string.IsNullOrWhiteSpace(sourceConnectionString))
     return Fail($"Set {sourceVariable} or pass --source with the Render PostgreSQL connection string.");
 }
 
-destinationPath = Path.GetFullPath(destinationPath);
 if (File.Exists(destinationPath) && !replace)
 {
     return Fail($"Destination already exists: {destinationPath}. Pass --replace only after confirming it is safe to replace.");
@@ -187,10 +201,85 @@ static async Task VerifyCountAsync(SqliteConnection connection, string table, lo
     }
 }
 
+static async Task<int> ClearAsteroidsAsync(string databasePath, bool confirmed)
+{
+    if (!confirmed)
+    {
+        return Fail("Clearing Asteroids data requires --confirm-clear.");
+    }
+
+    if (!File.Exists(databasePath))
+    {
+        return Fail($"SQLite database does not exist: {databasePath}");
+    }
+
+    var backupPath = $"{databasePath}.backup-{DateTime.UtcNow:yyyyMMdd-HHmmss}.db";
+
+    try
+    {
+        await using var database = new SqliteConnection(
+            $"Data Source={databasePath};Mode=ReadWrite;Pooling=False;Default Timeout=30");
+        await database.OpenAsync();
+        await ExecuteAsync(database, "PRAGMA foreign_keys = ON;");
+
+        var contactsBefore = await ScalarLongAsync(database, "SELECT count(*) FROM contact_submissions;");
+        var pilotsBefore = await ScalarLongAsync(database, "SELECT count(*) FROM asteroids_pilots;");
+        var scoresBefore = await ScalarLongAsync(database, "SELECT count(*) FROM asteroids_scores;");
+
+        await using (var backup = new SqliteConnection(
+                         $"Data Source={backupPath};Mode=ReadWriteCreate;Pooling=False"))
+        {
+            await backup.OpenAsync();
+            database.BackupDatabase(backup);
+        }
+
+        await ExecuteAsync(database, "BEGIN IMMEDIATE;");
+        try
+        {
+            await ExecuteAsync(database, "DELETE FROM asteroids_scores;");
+            await ExecuteAsync(database, "DELETE FROM asteroids_pilots;");
+            await ExecuteAsync(database, "COMMIT;");
+        }
+        catch
+        {
+            await ExecuteAsync(database, "ROLLBACK;");
+            throw;
+        }
+
+        await VerifyCountAsync(database, "asteroids_scores", 0);
+        await VerifyCountAsync(database, "asteroids_pilots", 0);
+        await VerifyCountAsync(database, "contact_submissions", contactsBefore);
+
+        var foreignKeyErrors = await ScalarLongAsync(database, "SELECT count(*) FROM pragma_foreign_key_check;");
+        if (foreignKeyErrors != 0)
+        {
+            throw new InvalidOperationException(
+                $"SQLite foreign-key verification found {foreignKeyErrors} error(s).");
+        }
+
+        await ExecuteAsync(database, "PRAGMA wal_checkpoint(PASSIVE);");
+
+        Console.WriteLine($"Asteroids reset complete: deleted {scoresBefore} scores and {pilotsBefore} pilots.");
+        Console.WriteLine($"Preserved {contactsBefore} contact submissions.");
+        Console.WriteLine($"Backup: {backupPath}");
+        return 0;
+    }
+    catch (Exception exception)
+    {
+        Console.Error.WriteLine($"Asteroids reset failed. {exception.Message}");
+        if (File.Exists(backupPath))
+        {
+            Console.Error.WriteLine($"Backup retained at: {backupPath}");
+        }
+        return 1;
+    }
+}
+
 static int Fail(string message)
 {
     Console.Error.WriteLine(message);
-    Console.Error.WriteLine("Usage: dotnet GipeDev.DataTransfer.dll [--source CONNECTION] [--destination PATH] [--replace]");
+    Console.Error.WriteLine("Transfer: dotnet GipeDev.DataTransfer.dll [--source CONNECTION] [--destination PATH] [--replace]");
+    Console.Error.WriteLine("Reset: dotnet GipeDev.DataTransfer.dll --clear-asteroids [--destination PATH] --confirm-clear");
     return 2;
 }
 
