@@ -7,11 +7,15 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 const apiUrl = (path) => `${apiBaseUrl.replace(/\/$/, '')}${path}`
 
 function formatScoreDate(value) {
-  return new Intl.DateTimeFormat('en-US', {
+  const date = new Date(value)
+  const month = new Intl.DateTimeFormat('en-US', {
     month: 'short',
-    day: '2-digit',
     timeZone: 'UTC',
-  }).format(new Date(value)).toUpperCase()
+  }).format(date).toUpperCase()
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  const year = String(date.getUTCFullYear())
+
+  return `${month} ${day} ${year}`
 }
 
 function VectorShip({ className = '' }) {
@@ -23,7 +27,7 @@ function VectorShip({ className = '' }) {
   )
 }
 
-function ShipCursor() {
+export function ShipCursor() {
   const cursorRef = useRef(null)
   const shotLayerRef = useRef(null)
   const fireTimer = useRef(null)
@@ -41,6 +45,8 @@ function ShipCursor() {
     if (!finePointer || reducedMotion) return undefined
 
     document.body.classList.add('ship-cursor-active')
+    const cursorNoseOffset = 15.25
+    const projectileLead = 7
     let animationFrame
     let disposed = false
 
@@ -73,8 +79,8 @@ function ShipCursor() {
       const viewport = shotLayerRef.current.getBoundingClientRect()
       const viewportWidth = viewport.width || document.documentElement.clientWidth
       const viewportHeight = viewport.height || document.documentElement.clientHeight
-      const startX = current.current.x + Math.cos(angle) * 22
-      const startY = current.current.y + Math.sin(angle) * 22
+      const startX = current.current.x + Math.cos(angle) * projectileLead
+      const startY = current.current.y + Math.sin(angle) * projectileLead
       const shot = document.createElement('i')
       shot.className = 'cursor-projectile'
       shotLayerRef.current.appendChild(shot)
@@ -119,12 +125,15 @@ function ShipCursor() {
     }
 
     const animate = () => {
-      current.current.x += (target.current.x - current.current.x) * 0.28
-      current.current.y += (target.current.y - current.current.y) * 0.28
+      current.current.x = target.current.x
+      current.current.y = target.current.y
       let angleDelta = ((target.current.angle - current.current.angle + 540) % 360) - 180
       current.current.angle += angleDelta * 0.22
       if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0) rotate(${current.current.angle}deg)`
+        const angle = current.current.angle * Math.PI / 180
+        const cursorX = current.current.x - Math.cos(angle) * cursorNoseOffset
+        const cursorY = current.current.y - Math.sin(angle) * cursorNoseOffset
+        cursorRef.current.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0) rotate(${current.current.angle}deg)`
       }
       animationFrame = requestAnimationFrame(animate)
     }
@@ -156,7 +165,7 @@ function ShipCursor() {
   )
 }
 
-function CabinetBackdrop() {
+export function CabinetBackdrop() {
   return (
     <div className="cabinet-backdrop" aria-hidden="true">
       <svg className="space-lines" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
@@ -205,7 +214,7 @@ function IntroFlyby() {
   )
 }
 
-function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
+function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore, panelRef }) {
   const [pilotId, setPilotId] = useState('')
   const [score, setScore] = useState('')
   const [pilotMenuOpen, setPilotMenuOpen] = useState(false)
@@ -224,6 +233,12 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
   }
 
   const addPilot = async () => {
+    if (newPilot.length !== 3 || !/[A-Z]/.test(newPilot)) {
+      setStatus('error')
+      setFeedback('ENTER THREE INITIALS WITH AT LEAST ONE LETTER')
+      return
+    }
+
     setStatus('submitting')
     setFeedback('')
 
@@ -247,11 +262,25 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
       return
     }
 
+    const scoreValue = Number(score)
+
+    if (scoreValue < 10) {
+      setStatus('error')
+      setFeedback('SCORE MUST BE AT LEAST 10')
+      return
+    }
+
+    if (scoreValue % 10 !== 0) {
+      setStatus('error')
+      setFeedback('SCORE MUST BE DIVISIBLE BY 10')
+      return
+    }
+
     setStatus('submitting')
     setFeedback('TRANSMITTING SCORE')
 
     try {
-      await onRecordScore(pilotId, Number(score))
+      await onRecordScore(pilotId, scoreValue)
       setStatus('success')
       setFeedback('SCORE TRANSMISSION COMPLETE')
       setScore('')
@@ -262,7 +291,7 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
   }
 
   return (
-    <div className="score-entry-panel">
+    <div className="score-entry-panel" ref={panelRef}>
       <div className="panel-header">
         <span><VectorText text="NEW TRANSMISSION" /></span>
         <button type="button" onClick={onClose} aria-label="Close score entry"><VectorText text="X" /></button>
@@ -282,9 +311,9 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
               </div>
             )}
           </div>
-          {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10))} aria-label="New pilot name" autoFocus /><VectorText text={newPilot || 'PILOT NAME'} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={!newPilot || status === 'submitting'} onClick={addPilot}><VectorText text="ADD" /></button></div>}
+          {addingPilot && <div className="new-pilot-entry"><span className={`vector-input ${newPilot ? '' : 'is-empty'}`}><input value={newPilot} onChange={(event) => setNewPilot(event.target.value.toUpperCase().replace(/[^A-Z ]/g, '').slice(0, 3))} aria-label="Three-character pilot initials" maxLength="3" autoFocus /><VectorText text={newPilot} /><i className="vector-caret" /></span><button className="arcade-button" type="button" disabled={newPilot.length !== 3 || !/[A-Z]/.test(newPilot) || status === 'submitting'} onClick={addPilot}><VectorText text="ADD" /></button></div>}
         </fieldset>
-        <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 8))} inputMode="numeric" aria-label="Score" /><VectorText text={score || '00000'} /><i className="vector-caret" /></span></label>
+        <label><span><VectorText text="SCORE" /></span><span className={`vector-input ${score ? '' : 'is-empty'}`}><input value={score} onChange={(event) => setScore(event.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" max="999990" aria-label="Score" /><VectorText text={score} /><i className="vector-caret" /></span></label>
         <button className="arcade-button" type="submit" disabled={status === 'submitting'}><VectorText text={status === 'submitting' ? 'TRANSMITTING' : 'RECORD SCORE'} /></button>
         <p className={`transmission-status ${status}`} aria-live="polite"><VectorText text={feedback || 'SELECT OR REGISTER PILOT'} /></p>
       </form>
@@ -293,6 +322,9 @@ function ScoreEntry({ pilots, onClose, onCreatePilot, onRecordScore }) {
 }
 
 export default function AsteroidsApp() {
+  const leaderboardRef = useRef(null)
+  const scoreEntryRef = useRef(null)
+  const hasOpenedEntryRef = useRef(false)
   const [showEntry, setShowEntry] = useState(false)
   const [pilots, setPilots] = useState([])
   const [scores, setScores] = useState([])
@@ -340,6 +372,22 @@ export default function AsteroidsApp() {
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    if (!showEntry && !hasOpenedEntryRef.current) return
+    if (showEntry) hasOpenedEntryRef.current = true
+
+    const frame = requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const target = showEntry ? scoreEntryRef.current : leaderboardRef.current
+      target?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: showEntry ? 'start' : 'end',
+      })
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [showEntry])
+
   const createPilot = async (name) => {
     const response = await fetch(apiUrl('/api/asteroids/pilots'), {
       method: 'POST',
@@ -381,17 +429,16 @@ export default function AsteroidsApp() {
 
       <header className="arcade-header">
         <a href="/" className="back-link" aria-label="Back to GipeDev"><VectorText text="< GIPEDEV" /></a>
-        <a className="cabinet-status" href="https://www.youtube.com/watch?v=JiGjU-NnkfE" target="_blank" rel="noreferrer" aria-label="Watch the history of Asteroids on YouTube"><VectorText text="HISTORY OF ASTEROIDS >" /></a>
+        <a className="cabinet-status" href="/asteroids/scores/" aria-label="View the complete score archive"><VectorText text="SCORE ARCHIVE >" /></a>
       </header>
 
       <main>
         <section className="score-hero">
           <div className="hero-kicker"><VectorText text="ORIGINAL CABINET // HOME LEAGUE" /></div>
           <h1><span data-text="ASTEROIDS">Asteroids</span><b><VectorText text="HIGH SCORES" label="High Scores" /></b></h1>
-          <div className="hero-subtitle"><VectorText text="ONE MACHINE // A HANDFUL OF PILOTS // NO EXTRA LIVES" /></div>
+          <div className="hero-subtitle"><VectorText text="ONE PILOT // FOUR LIVES // EXTRA LIFE EVERY 10K" /></div>
 
-          <div className="leaderboard-shell">
-            <div className="leaderboard-topline"><span><VectorText text="RANK" /></span><span><VectorText text="PILOT" /></span><span><VectorText text="SCORE" /></span><span><VectorText text="DATE" /></span></div>
+          <div className="leaderboard-shell" ref={leaderboardRef}>
             <ol className="leaderboard">
               {scores.map((entry, index) => (
                 <li key={entry.id} className={index === 0 ? 'champion' : ''}>
@@ -411,7 +458,9 @@ export default function AsteroidsApp() {
             </div>
           </div>
 
-          {showEntry && <ScoreEntry pilots={pilots} onClose={() => setShowEntry(false)} onCreatePilot={createPilot} onRecordScore={recordScore} />}
+          <a className="archive-launch" href="/asteroids/scores/"><VectorText text="VIEW COMPLETE SCORE ARCHIVE >" /></a>
+
+          {showEntry && <ScoreEntry pilots={pilots} onClose={() => setShowEntry(false)} onCreatePilot={createPilot} onRecordScore={recordScore} panelRef={scoreEntryRef} />}
         </section>
       </main>
 
