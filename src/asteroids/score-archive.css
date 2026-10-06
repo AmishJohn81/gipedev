@@ -1,0 +1,47 @@
+.score-archive-app { min-height: 100vh; }
+.archive-page { position: relative; z-index: 2; width: min(100% - 40px, 660px); margin: 0 auto; padding: 52px 0 90px; }
+.archive-page > .hero-kicker { justify-content: center; }
+.archive-page h1 { margin: 28px auto 10px; display: flex; justify-content: center; color: white; font-size: clamp(30px, 6vw, 58px); }
+.archive-page h1 .vector-text { stroke: #efffff; filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 5px #65d8ff) drop-shadow(0 0 14px #168cff); }
+.archive-intro { margin: 0 0 38px; display: flex; justify-content: center; color: white; font-size: 11px; }
+.archive-panel { padding: 10px; background: #050608e8; border: 1px solid #40526f; box-shadow: 0 0 0 5px #050608, 0 0 0 6px #e62f27, 0 25px 80px #000; }
+.archive-filters { margin: 0; padding: 18px; display: grid; grid-template-columns: 85px 175px 105px 105px 88px; justify-content: center; gap: 8px; border-bottom: 1px solid #344050; }
+.archive-control { min-width: 0; display: grid; gap: 8px; color: white; font-size: 10px; }
+.archive-control > span:first-child { opacity: .7; }
+.archive-vector-input, .archive-select { position: relative; height: 42px; padding: 0 12px; display: flex; align-items: center; overflow: hidden; color: white; background: #05080d; border: 1px solid #68707b; font-size: 15px; }
+.archive-vector-input input, .archive-select select { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: text; }
+.archive-select select { cursor: pointer; }
+.archive-vector-input .vector-text, .archive-select .vector-text { pointer-events: none; }
+.archive-select i { position: absolute; right: 13px; width: 8px; height: 8px; border-right: 1px solid #efffff; border-bottom: 1px solid #efffff; transform: translateY(-2px) rotate(45deg); box-shadow: 2px 2px 4px #168cff; }
+.archive-filter-button { min-width: 0; height: 42px; align-self: end; }
+.archive-filter-error { grid-column: 1 / -1; margin: 4px 0 0; color: white; font-size: 9px; }
+.archive-vector-input:focus-within, .archive-select:focus-within { border-color: #efffff; box-shadow: 0 0 9px #168cff; }
+.archive-vector-input:focus-within .vector-caret { animation: vector-caret-blink .9s steps(1, end) infinite; }
+.archive-vector-input.is-empty .vector-caret { order: -1; margin-right: 3px; margin-left: 0; }
+.archive-table-wrap { overflow-x: auto; border-top: 1px solid #344050; border-bottom: 1px solid #344050; }
+.archive-table { min-width: 560px; }
+.archive-table-header, .archive-table-row { display: grid; grid-template-columns: 85px 80px 110px 190px; justify-content: space-between; column-gap: 0; align-items: center; }
+.archive-table-header { min-height: 44px; padding: 0 20px; }
+.archive-table-header button { padding: 0; display: flex; color: white; background: none; border: 0; font-size: 10px; cursor: pointer; transition: opacity .2s; }
+.archive-table-header button:nth-child(3) { justify-content: flex-end; }
+.archive-table-header button:hover, .archive-table-header button:focus-visible { opacity: .8; }
+.archive-table-row { min-height: 58px; padding: 0 20px; color: white; border-top: 1px solid #293341; font-size: 17px; }
+.archive-table-row:hover { background: #ffffff0c; }
+.archive-rank { opacity: .72; }
+.archive-score .vector-text { margin-left: auto; }
+.archive-empty { min-height: 90px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+.archive-pagination { min-height: 62px; padding: 0 18px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; color: white; font-size: 10px; }
+.archive-pagination button { width: max-content; padding: 8px 0; color: white; background: none; border: 0; font-size: 10px; cursor: pointer; }
+.archive-pagination button:last-child { justify-self: end; }
+.archive-pagination button:disabled { opacity: .25; cursor: default; }
+.archive-pagination button:not(:disabled):hover .vector-text, .archive-pagination button:not(:disabled):focus-visible .vector-text { stroke: #ffe52b; }
+
+@media (max-width: 760px) {
+  .archive-page { width: min(100% - 24px, 660px); padding-top: 34px; }
+  .archive-filters { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .archive-filters { grid-template-columns: 1fr; }
+  .archive-pagination { gap: 10px; }
+}

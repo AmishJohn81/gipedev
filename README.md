@@ -19,6 +19,7 @@ The Asteroids Home League is available during local development at:
 
 ```text
 http://localhost:5173/asteroids/
+http://localhost:5173/asteroids/scores/
 ```
 
 ## API
@@ -39,6 +40,7 @@ The API endpoints are:
 - `GET /api/asteroids/pilots` — list registered pilot names
 - `POST /api/asteroids/pilots` — register a pilot name
 - `GET /api/asteroids/scores?limit=10` — return the highest scores
+- `GET /api/asteroids/scores/archive` — search, filter, sort, and page through every score
 - `POST /api/asteroids/scores` — record a score for an existing pilot
 
 A contact request has this shape:
@@ -56,10 +58,11 @@ The optional `company` field is a honeypot and should remain hidden and empty in
 the user-facing form. Contact submissions are limited to five attempts per IP
 address every ten minutes.
 
-Asteroids pilots contain only an ID and a short display name; there are no
-accounts, passwords, email addresses, or other identifying fields. Pilot names
-must contain 1–10 letters or numbers and are unique without regard to case. A
-score request has this shape:
+Asteroids pilots contain only an ID and three-character initials; there are no
+accounts, passwords, email addresses, or other identifying fields. Pilot initials
+may contain letters and spaces, must include at least one letter, and are unique
+without regard to case. Scores must be divisible by 10 and fall between 10 and
+999,990. A score request has this shape:
 
 ```json
 {
