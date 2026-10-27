@@ -141,7 +141,20 @@ function App() {
             <p>Practical tools built around real needs, explored with curiosity and crafted with care.</p>
           </div>
 
-          <a className="project-card" href="/asteroids/">
+          <a className="project-card" href="/perfect-storm/">
+            <div className="project-preview storm-preview">
+              <span className="preview-label">A fictional helpdesk scenario</span>
+              <div className="storm-card-art" aria-hidden="true"><span>N / 01</span><strong>↗</strong><span>Find a clear course.</span></div>
+            </div>
+            <div className="project-details">
+              <div className="project-meta"><span>Helpdesk triage</span><span>Scenario study</span></div>
+              <h3>A perfect storm hits the helpdesk...<br />How do they navigate it?</h3>
+              <p>New hires. A major release. An external outage. An urgent security advisory. One overwhelmed helpdesk, and a queue that keeps growing.</p>
+              <span className="project-link">Explore the scenario <Arrow /></span>
+            </div>
+          </a>
+
+          <a className="project-card asteroid-project" href="/asteroids/">
             <div className="project-preview asteroid-preview">
               <span className="preview-label">In development</span>
               <svg viewBox="0 0 180 100" aria-hidden="true">
