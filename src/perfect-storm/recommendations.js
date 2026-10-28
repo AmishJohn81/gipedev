@@ -1,0 +1,38 @@
+export const recommendations = [
+  {
+    team: 'Identity & Access',
+    reason: 'Multiple new starters report access denied during onboarding. This company assigns account provisioning and permissions to Identity & Access.',
+    missing: 'Affected usernames, the payroll system, the exact error, and whether accounts exist.',
+    incident: 'Possible connection to the onboarding setup problems. Individual account checks are still required.',
+    draft: 'Please share the affected usernames, the payroll system name, and the exact error. Can those users sign in to their other company systems? Do not include passwords or authentication codes.',
+    reply: 'Three new starters can sign in to company email, but Example Payroll says “You do not have permission to access this application.” Their usernames are newstarter01, newstarter02, and newstarter03.',
+    updated: 'The sample reply narrows this to application access for three named accounts. Identity & Access remains the suggested owner to verify provisioning and payroll permissions; the application owner may need to help. The exact cause is not yet confirmed.',
+  },
+  {
+    team: 'Mobile App Development',
+    reason: 'The reported crash follows today’s mobile release and occurs during a specific application action. Mobile App Development owns release defects.',
+    missing: 'Device model, operating system, app version, reproduction steps, and scope of impact.',
+    incident: 'Possibly associated with the release. The report does not establish a shared defect or an external outage.',
+    draft: 'Which device, operating system, and app version are you using? What steps lead to the crash, and does it happen every time? Please use a test reference rather than sharing payment details.',
+    reply: 'On our test device, Example Phone running Example OS 18 with app version 6.0, submitting a test payment closes the app every time. It started after this morning’s update. No payment details are attached.',
+    updated: 'The sample reply provides a version, environment, and repeatable action for the development team to investigate. Mobile App Development remains the suggested owner. Reproduction and impact still need verification.',
+  },
+  {
+    team: 'Infrastructure & Network',
+    reason: 'The ticket describes service availability. Infrastructure & Network coordinates availability checks and external service incidents in this company.',
+    missing: 'Portal URL, error message, start time, and which users or locations are affected.',
+    incident: 'The known Cloudflare outage is a possible connection, not a confirmed cause.',
+    draft: 'Which portal address are you opening, what error appears, and when did it start? Are others on your team affected? Please do not send passwords or authentication codes.',
+    reply: 'It is portal.example.com. We see a 502 error starting around 08:00. Five colleagues in two offices see the same problem.',
+    updated: 'The sample reply establishes a shared availability symptom across two offices. Infrastructure & Network can correlate the URL and timing with the known outage. A 502 error does not prove that Cloudflare is the cause.',
+  },
+  {
+    team: 'Security',
+    reason: 'This is a vulnerability assessment request. Security coordinates exposure assessment and remediation ownership; system owners perform any required patching.',
+    missing: 'Advisory identifier, affected versions, deployed PHP inventory, and system owners.',
+    incident: 'Track as a security assessment. There is no evidence here of exploitation or a connection to the availability outage.',
+    draft: 'Please share the advisory reference and any known affected PHP versions or internal systems. If the inventory is unknown, say so; Security can start coordinating the assessment without waiting for a complete list.',
+    reply: 'This is a fictional PHP advisory used for the exercise. The initial inventory lists two PHP-based internal services, but their versions and owners still need verification.',
+    updated: 'The sample reply gives Security a starting inventory while leaving affected versions and ownership unresolved. Begin assessment with Security now and involve the service owners. Exposure and patch requirements are not yet established.',
+  },
+]

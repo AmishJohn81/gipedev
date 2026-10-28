@@ -5,6 +5,8 @@ services:
       dockerfile: api/GipeDev.Api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      OpenAI__ApiKey: ${OPENAI_API_KEY:-}
+      OpenAI__Model: ${OPENAI_MODEL:-}
       DatabaseProvider: Sqlite
       ConnectionStrings__GipeDev: Data Source=/app/data/gipedev.db;Default Timeout=30
     ports:

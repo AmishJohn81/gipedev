@@ -22,7 +22,77 @@ http://localhost:5173/asteroids/
 http://localhost:5173/asteroids/scores/
 ```
 
-## API
+## Helpdesk triage walkthrough
+
+The four-chapter portfolio project starts at `/perfect-storm/`. Chapters two and
+three are local, predefined exercises. Chapter four (`/perfect-storm/live/`) calls
+`POST /api/triage/analyze` on the existing API for initial analysis and clarification
+reassessment. It includes a progress guide and editable handoff fields. Assignment
+confirmation stays in the walkthrough; it does not write to a real ticketing system.
+Manual choices in chapter two use tab-scoped session storage for comparison in
+chapter three. Chapter-four text stays in page memory and clears on reload, but is
+sent through the API to OpenAI when analysis is requested. Use fictional details.
+
+The API uses the OpenAI Responses API with a strict JSON schema, server-owned
+company context, and response validation. Missing credentials/model configuration
+produce a safe `503` without calling OpenAI. There is no silent rules-based or mock
+fallback in production. Tickets and replies are not saved in the application database
+or written to application logs. Requests use `store: false` for generated Responses;
+this does not independently establish zero data retention at the provider.
+
+### Configure live triage
+
+Both the server API key and a Structured Outputs-compatible model ID must be configured.
+Model access and provider billing must be available in your OpenAI API project.
+
+- For a direct `dotnet run`, set server environment variables `OpenAI__ApiKey` and
+  `OpenAI__Model` before starting the API.
+- For Docker development, fill `OPENAI_API_KEY` and `OPENAI_MODEL` in the ignored
+  `.env.local` file, then run `docker compose --env-file .env.local up --build`.
+- For Render, add `OpenAI__ApiKey` as a secret environment variable and
+  `OpenAI__Model` as an environment variable on the existing API service. The
+  frontend still uses only `VITE_API_BASE_URL`; never use a `VITE_` name for a secret.
+
+No key is needed to build or run the mocked checks. Do not commit credentials.
+No default model is selected; configure the exact model ID you intend to evaluate.
+
+Default controls: six requests per IP every ten minutes, three concurrent provider
+calls, and 100 provider attempts per hour across this API instance. The latter limit
+is configurable via `OpenAI__HourlyRequestLimit`; it resets on restart and is not a
+durable spending cap across multiple instances. Also configure provider billing
+controls before public use. The provider timeout defaults to 40 seconds and output
+to 3,000 tokens (`OpenAI__TimeoutSeconds`, `OpenAI__MaxOutputTokens`). Input has a
+24 KiB body limit plus subject/description/follow-up/reply character limits.
+No automatic provider retries are performed. Metadata logging records HTTP status,
+elapsed time, and token counts, not ticket text, model output, or credentials.
+
+### Verify triage without a key
+
+```bash
+node --test src/perfect-storm/triage-api.test.js
+dotnet run --project api/GipeDev.TriageChecks
+```
+
+The .NET checks use a fake HTTP provider and a local MVC host to verify payloads,
+validation, missing configuration, refusals, malformed responses, timeouts, and
+rate limits. They make no live AI calls. Real model quality, latency, usage cost,
+and browser end-to-end behavior still need evaluation once credentials are set.
+
+For an optional real-provider smoke test after configuring `.env.local`, run
+`dotnet run --project api/GipeDev.TriageChecks -- --live` (or add `--printer` for the
+printer example). This makes one billable synthetic request and prints only status,
+usage, and safe validation diagnostics. It does not print credentials or response
+content. Validation diagnostics identify field names or response stages, not values.
+
+`POST /api/triage/analyze` accepts `title` (120 characters), `description` (3,000),
+and optional `followUp`/`reply` (1,500 each). A reply requires its approved follow-up.
+Its response contains `team`, `reason`, `uncertain`, `alternatives`, `questions`,
+`assessment`, and `handoff`. Unknown ownership uses an empty team and requires
+analyst selection before routing. The same endpoint incorporates the actual
+clarification conversation on reassessment; no model conversation ID or database
+record is required.
+
+## API service
 
 The general GipeDev API is an ASP.NET Core application in `api/GipeDev.Api`.
 
