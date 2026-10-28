@@ -4,6 +4,8 @@ import '../styles.css'
 import './storm.css'
 import ManualTriage from './ManualTriage.jsx'
 import AssistedTriage from './AssistedTriage.jsx'
+import IntendedOutcome from './IntendedOutcome.jsx'
+import LiveTriagePage from './LiveTriagePage.jsx'
 
 const fronts = [
   ['01', 'People, waiting to begin.', 'The largest new-hire class in years arrives for the monthly start date. Several account setups were missed entirely; others have the wrong privileges. New colleagues cannot access the common systems they need. Managers and trainers are asking for help, and a first day is slipping away.'],
@@ -16,9 +18,10 @@ const chapters = [
   { href: '/perfect-storm/', label: 'Understand the situation', short: 'The scenario' },
   { href: '/perfect-storm/experience/', label: 'Experience the problem', short: 'The queue' },
   { href: '/perfect-storm/solution/', label: 'Explore the solution', short: 'The solution demo' },
+  { href: '/perfect-storm/live/', label: 'Beyond the examples', short: 'Live AI triage' },
 ]
 const path = window.location.pathname.replace(/\/+$/, '')
-const chapter = path.endsWith('/experience') ? 1 : path.endsWith('/solution') ? 2 : 0
+const chapter = path.endsWith('/experience') ? 1 : path.endsWith('/solution') ? 2 : path.endsWith('/live') ? 3 : 0
 
 function ChapterNavigation() {
   return <nav className="storm-chapters" aria-label="Project chapters"><ol>{chapters.map((item, index) => <li key={item.href}><a href={item.href} aria-current={index === chapter ? 'page' : undefined}><span className="chapter-number">0{index + 1}</span><span><small>{item.short}</small><strong>{item.label}</strong></span><span aria-hidden="true">→</span></a></li>)}</ol></nav>
@@ -27,7 +30,7 @@ function ChapterNavigation() {
 function ChapterLinks() {
   return <nav className="storm-page-turn" aria-label="Continue through the project">
     {chapter > 0 ? <a className="storm-previous" href={chapters[chapter - 1].href}><small>← Previous chapter</small><span>{chapters[chapter - 1].label}</span></a> : <a className="storm-previous" href="/#work"><small>← Portfolio</small><span>Back to selected work</span></a>}
-    {chapter < 2 ? <a className="storm-next" href={chapters[chapter + 1].href}><small>Next chapter / 0{chapter + 2}</small><strong>{chapters[chapter + 1].label} →</strong><span>{chapter === 0 ? 'Step into the helpdesk and open the incoming work orders.' : 'See how a clearer triage process could help.'}</span></a> : <a className="storm-next" href="/#contact"><small>Continue the conversation</small><strong>Discuss this approach →</strong><span>Bring a business problem. Let’s find a clear course.</span></a>}
+    {chapter < chapters.length - 1 ? <a className="storm-next" href={chapters[chapter + 1].href}><small>Next chapter / 0{chapter + 2}</small><strong>{chapters[chapter + 1].label} →</strong><span>{chapter === 0 ? 'Step into the helpdesk and open the incoming work orders.' : chapter === 1 ? 'See how a clearer triage process could help.' : 'Move beyond the guided examples toward live AI triage.'}</span></a> : <a className="storm-next" href="/#contact"><small>Continue the conversation</small><strong>Discuss this approach →</strong><span>Bring a business problem. Let’s find a clear course.</span></a>}
   </nav>
 }
 
@@ -43,7 +46,7 @@ function SolutionPage() {
   return <>
     <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>Interactive walkthrough · Predefined recommendations</span><a href="#demo-direction">Try assisted triage ↓</a></div></div></section>
     <AssistedTriage />
-    <section className="storm-approach"><div className="storm-section"><p className="storm-kicker">The intended outcome</p><h2>Less time routing.<br /><em>More time helping.</em></h2><p className="storm-approach-intro">A useful solution will make the next action easier to understand and explain. This walkthrough shows both straightforward requests and ambiguous cases that still need a person’s judgment.</p></div></section>
+    <IntendedOutcome />
   </>
 }
 
@@ -96,7 +99,7 @@ function StormPage() {
       </div></section>
 
       <section className="storm-section storm-two-column storm-destination"><div><p className="storm-kicker">What better looks like</p><h2>A team with<br />a clearer heading.</h2></div><div><p>New hires reach the teams that can restore their access. App developers receive useful break-fix reports. Outage-related requests share context. The PHP advisory has an accountable owner. Everyday requests remain visible.</p><p>Success would mean less time spent deciding where work belongs, fewer tickets bouncing between teams, and a clearer next step for everyone involved.</p><p className="storm-emphasis">This is the starting brief. The next chapter is turning these needs into a helpdesk triage experience.</p></div></section>
-      </> : chapter === 1 ? <ExperiencePage /> : <SolutionPage />}
+      </> : chapter === 1 ? <ExperiencePage /> : chapter === 2 ? <SolutionPage /> : <LiveTriagePage />}
       <ChapterLinks />
     </main>
     <footer><div className="footer-bottom"><span>© {new Date().getFullYear()} GipeDev</span><a href="/#work">Back to selected work ↗</a><span>Fictional scenario · Real engineering judgment</span></div></footer>

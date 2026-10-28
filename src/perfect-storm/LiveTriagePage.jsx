@@ -1,0 +1,6 @@
+export default function LiveTriagePage() {
+  return <>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 04 / Live AI triage</p><h1>A new request.<br /><em>The same clear course.</em></h1><p className="storm-deck">The guided examples set the direction. The next step is applying that workflow to a work order of your own.</p><div className="storm-hero-bottom"><span>Coming next / AI connection in development</span><a href="#live-preview">What comes next ↓</a></div></div></section>
+    <section className="storm-section storm-two-column" id="live-preview"><div><p className="storm-kicker">Beyond the four examples</p><h2>Your request.<br />A recommendation<br />to review.</h2></div><div><p>This page will let you describe a new work order and receive an AI-generated triage recommendation grounded in the fictional company’s team ownership rules and incident context.</p><p>The planned experience will suggest a destination, explain its reasoning, identify missing details, and help prepare a handoff for your review. Uncertainty and the analyst’s final decision will remain part of the workflow.</p><p className="storm-emphasis">The live AI interaction is not available yet. This chapter is the next stage of the project.</p></div></section>
+  </>
+}
