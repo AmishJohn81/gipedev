@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import '../styles.css'
 import './storm.css'
 import ManualTriage from './ManualTriage.jsx'
+import AssistedTriage from './AssistedTriage.jsx'
 
 const fronts = [
   ['01', 'People, waiting to begin.', 'The largest new-hire class in years arrives for the monthly start date. Several account setups were missed entirely; others have the wrong privileges. New colleagues cannot access the common systems they need. Managers and trainers are asking for help, and a first day is slipping away.'],
@@ -40,9 +41,9 @@ function ExperiencePage() {
 
 function SolutionPage() {
   return <>
-    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>Demo preview · Interactive triage is the next stage</span><a href="#demo-direction">Explore the direction ↓</a></div></div></section>
-    <section className="storm-section" id="demo-direction"><p className="storm-kicker">From problem to proposed workflow</p><h2>Support the decision.<br />Keep the person in control.</h2><p>The queue showed how much interpretation each work order requires. The planned demo will carry a request through three steps:</p><div className="storm-front-grid"><article className="storm-front"><span className="storm-number">01 / Read</span><h3>Understand the request.</h3><p>Identify the reported problem, missing details, and possible links to an existing incident.</p></article><article className="storm-front"><span className="storm-number">02 / Recommend</span><h3>Explain the next step.</h3><p>Suggest a destination team with a clear reason. Flag uncertainty and questions that need an answer before routing.</p></article><article className="storm-front"><span className="storm-number">03 / Review</span><h3>Let the analyst decide.</h3><p>Accept the recommendation, correct it, or request more information before making the handoff.</p></article><article className="storm-front storm-demo-status"><span className="storm-number">Next stage</span><h3>The interactive demo.</h3><p>This page establishes the destination for the walkthrough. Live recommendations and routing controls have not been built yet.</p></article></div></section>
-    <section className="storm-approach"><div className="storm-section"><p className="storm-kicker">The intended outcome</p><h2>Less time routing.<br /><em>More time helping.</em></h2><p className="storm-approach-intro">A useful solution will make the next action easier to understand and explain. The demo will show both straightforward requests and ambiguous cases that still need a person’s judgment.</p></div></section>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>Interactive walkthrough · Predefined recommendations</span><a href="#demo-direction">Try assisted triage ↓</a></div></div></section>
+    <AssistedTriage />
+    <section className="storm-approach"><div className="storm-section"><p className="storm-kicker">The intended outcome</p><h2>Less time routing.<br /><em>More time helping.</em></h2><p className="storm-approach-intro">A useful solution will make the next action easier to understand and explain. This walkthrough shows both straightforward requests and ambiguous cases that still need a person’s judgment.</p></div></section>
   </>
 }
 
