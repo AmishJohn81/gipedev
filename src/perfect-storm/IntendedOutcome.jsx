@@ -10,8 +10,8 @@ export default function IntendedOutcome() {
     </div>
     <div className="storm-outcome-details">
       <div><h3>What this could change for the helpdesk</h3><p>The intended impact is less effort per triage decision, fewer avoidable transfers between teams, and more complete tickets arriving in specialist queues. During a busy morning, that could help first-level support keep work moving without making every request another manual investigation.</p><p>Those benefits would need to be measured in a real deployment: time to assignment, routing corrections, repeat requests for information, and whether the receiving team can begin work with the details provided. This exercise demonstrates the workflow; it does not claim measured productivity gains.</p></div>
-      <div><h3>Four examples. One repeatable workflow.</h3><p>The four tickets, recommendations, clarification replies, and updated assessments were predefined to make the decisions easy to follow and compare. They show the experience I designed, rather than a live model’s ability to interpret a new request.</p><p>The next chapter takes that same approach toward an AI-connected experience: bring a different work order, interpret it using the company’s ownership rules, and review a recommendation built from the information supplied.</p></div>
+      <div><h3>Four examples. One repeatable workflow.</h3><p>These guided examples illustrate the work AI can support: recommending routes, drafting clarification questions, and updating a handoff as new information arrives. The four tickets and responses are predefined so you can focus on the decisions and the analyst’s review.</p><p>In the next chapter, a live AI model applies that workflow to your own work order: interpreting the request using the company’s ownership rules, generating a recommendation, and incorporating your clarification reply.</p></div>
     </div>
-    <p className="storm-approach-intro">Next: move beyond the guided examples and explore the direction for live AI triage.</p>
+    <p className="storm-approach-intro">Next: move beyond the guided examples and chart your own course with live AI triage.</p>
   </div></section>
 }
