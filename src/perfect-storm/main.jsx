@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../styles.css'
 import './storm.css'
+import ManualTriage from './ManualTriage.jsx'
 
 const fronts = [
   ['01', 'People, waiting to begin.', 'The largest new-hire class in years arrives for the monthly start date. Several account setups were missed entirely; others have the wrong privileges. New colleagues cannot access the common systems they need. Managers and trainers are asking for help, and a first day is slipping away.'],
@@ -10,14 +11,51 @@ const fronts = [
   ['04', 'A security concern that cannot wait.', 'An advisory describes a major PHP vulnerability. The organization needs to establish which systems are affected, who owns them, and how evaluation and patching will be coordinated. Its relevance to the environment is still unknown, but it cannot disappear into the general queue.'],
 ]
 
+const chapters = [
+  { href: '/perfect-storm/', label: 'Understand the situation', short: 'The scenario' },
+  { href: '/perfect-storm/experience/', label: 'Experience the problem', short: 'The queue' },
+  { href: '/perfect-storm/solution/', label: 'Explore the solution', short: 'The solution demo' },
+]
+const path = window.location.pathname.replace(/\/+$/, '')
+const chapter = path.endsWith('/experience') ? 1 : path.endsWith('/solution') ? 2 : 0
+
+function ChapterNavigation() {
+  return <nav className="storm-chapters" aria-label="Project chapters"><ol>{chapters.map((item, index) => <li key={item.href}><a href={item.href} aria-current={index === chapter ? 'page' : undefined}><span className="chapter-number">0{index + 1}</span><span><small>{item.short}</small><strong>{item.label}</strong></span><span aria-hidden="true">→</span></a></li>)}</ol></nav>
+}
+
+function ChapterLinks() {
+  return <nav className="storm-page-turn" aria-label="Continue through the project">
+    {chapter > 0 ? <a className="storm-previous" href={chapters[chapter - 1].href}><small>← Previous chapter</small><span>{chapters[chapter - 1].label}</span></a> : <a className="storm-previous" href="/#work"><small>← Portfolio</small><span>Back to selected work</span></a>}
+    {chapter < 2 ? <a className="storm-next" href={chapters[chapter + 1].href}><small>Next chapter / 0{chapter + 2}</small><strong>{chapters[chapter + 1].label} →</strong><span>{chapter === 0 ? 'Step into the helpdesk and open the incoming work orders.' : 'See how a clearer triage process could help.'}</span></a> : <a className="storm-next" href="/#contact"><small>Continue the conversation</small><strong>Discuss this approach →</strong><span>Bring a business problem. Let’s find a clear course.</span></a>}
+  </nav>
+}
+
+function ExperiencePage() {
+  return <>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 02 / Experience the problem</p><h1>You’re on<br /><em>the helpdesk.</em></h1><p className="storm-deck">The requests arrive together. The context does not.<br />Open a work order. Decide what you would need to know before routing it.</p><div className="storm-hero-bottom"><span>Fictional work orders · All awaiting triage</span><a href="#incoming">Open the queue ↓</a></div></div></section>
+    <ManualTriage />
+    <section className="storm-approach"><div className="storm-section"><p className="storm-kicker">Pause before the solution</p><h2>Every handoff<br /><em>starts with a decision.</em></h2><p className="storm-approach-intro">Which team owns this? Is it part of a known incident? What information is missing? An analyst repeats these decisions for every request while the queue continues to grow.</p><p className="storm-approach-intro">The next chapter frames how assistance could reduce that effort while keeping the analyst in control.</p></div></section>
+  </>
+}
+
+function SolutionPage() {
+  return <>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>Demo preview · Interactive triage is the next stage</span><a href="#demo-direction">Explore the direction ↓</a></div></div></section>
+    <section className="storm-section" id="demo-direction"><p className="storm-kicker">From problem to proposed workflow</p><h2>Support the decision.<br />Keep the person in control.</h2><p>The queue showed how much interpretation each work order requires. The planned demo will carry a request through three steps:</p><div className="storm-front-grid"><article className="storm-front"><span className="storm-number">01 / Read</span><h3>Understand the request.</h3><p>Identify the reported problem, missing details, and possible links to an existing incident.</p></article><article className="storm-front"><span className="storm-number">02 / Recommend</span><h3>Explain the next step.</h3><p>Suggest a destination team with a clear reason. Flag uncertainty and questions that need an answer before routing.</p></article><article className="storm-front"><span className="storm-number">03 / Review</span><h3>Let the analyst decide.</h3><p>Accept the recommendation, correct it, or request more information before making the handoff.</p></article><article className="storm-front storm-demo-status"><span className="storm-number">Next stage</span><h3>The interactive demo.</h3><p>This page establishes the destination for the walkthrough. Live recommendations and routing controls have not been built yet.</p></article></div></section>
+    <section className="storm-approach"><div className="storm-section"><p className="storm-kicker">The intended outcome</p><h2>Less time routing.<br /><em>More time helping.</em></h2><p className="storm-approach-intro">A useful solution will make the next action easier to understand and explain. The demo will show both straightforward requests and ambiguous cases that still need a person’s judgment.</p></div></section>
+  </>
+}
+
 function StormPage() {
   return <div className="storm-page">
-    <a className="storm-skip" href="#scenario">Skip to scenario</a>
+    <a className="storm-skip" href="#scenario">Skip to content</a>
     <header className="site-header">
       <a className="brand" href="/"><span className="brand-mark">G</span><span>GipeDev</span></a>
       <nav aria-label="Main navigation"><a href="/#work">All work ↗</a><a href="/john-gipe-resume.pdf" target="_blank" rel="noreferrer">Résumé ↗</a></nav>
     </header>
+    <ChapterNavigation />
     <main id="scenario">
+      {chapter === 0 ? <>
       <section className="storm-hero">
         <div className="storm-hero-inner">
           <p className="storm-kicker">Scenario study / 01 · Helpdesk triage</p>
@@ -56,7 +94,9 @@ function StormPage() {
         </div>
       </div></section>
 
-      <section className="storm-section storm-two-column storm-destination"><div><p className="storm-kicker">What better looks like</p><h2>A team with<br />a clearer heading.</h2></div><div><p>New hires reach the teams that can restore their access. App developers receive useful break-fix reports. Outage-related requests share context. The PHP advisory has an accountable owner. Everyday requests remain visible.</p><p>Success would mean less time spent deciding where work belongs, fewer tickets bouncing between teams, and a clearer next step for everyone involved.</p><p className="storm-emphasis">This is the starting brief. The next chapter is turning these needs into a helpdesk triage experience.</p><a className="text-link" href="/#contact">Discuss this approach ↗</a></div></section>
+      <section className="storm-section storm-two-column storm-destination"><div><p className="storm-kicker">What better looks like</p><h2>A team with<br />a clearer heading.</h2></div><div><p>New hires reach the teams that can restore their access. App developers receive useful break-fix reports. Outage-related requests share context. The PHP advisory has an accountable owner. Everyday requests remain visible.</p><p>Success would mean less time spent deciding where work belongs, fewer tickets bouncing between teams, and a clearer next step for everyone involved.</p><p className="storm-emphasis">This is the starting brief. The next chapter is turning these needs into a helpdesk triage experience.</p></div></section>
+      </> : chapter === 1 ? <ExperiencePage /> : <SolutionPage />}
+      <ChapterLinks />
     </main>
     <footer><div className="footer-bottom"><span>© {new Date().getFullYear()} GipeDev</span><a href="/#work">Back to selected work ↗</a><span>Fictional scenario · Real engineering judgment</span></div></footer>
   </div>

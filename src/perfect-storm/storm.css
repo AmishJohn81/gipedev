@@ -1,4 +1,18 @@
 .storm-page { background: #f6f5f0; color: #18303b; }
+.storm-chapters { display: block; background: #eeeee7; border-top: 1px solid #d8dcd6; border-bottom: 1px solid #d8dcd6; }
+.storm-chapters ol { max-width: 1180px; padding: 0 28px; margin: auto; list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); }
+.storm-chapters li { min-width: 0; }
+.storm-chapters a { height: 100%; display: flex; align-items: center; gap: 14px; padding: 22px 18px; border-bottom: 3px solid transparent; }
+.storm-chapters a[aria-current="page"] { background: #fffdf7; border-bottom-color: #a57e43; }
+.chapter-number { color: #8a6a3d; font: 14px 'DM Mono', monospace; }
+.storm-chapters small, .storm-page-turn small { display: block; font: 10px/1.7 'DM Mono', monospace; text-transform: uppercase; letter-spacing: .07em; }
+.storm-chapters small { color: #67797b; }.storm-chapters strong { display: block; font-size: 12px; line-height: 1.6; }.storm-chapters a > span:last-child { margin-left: auto; }
+.storm-page-turn { display: grid; grid-template-columns: .7fr 1.3fr; gap: 32px; max-width: 1180px; margin: auto; padding: 48px 28px 64px; border-top: 1px solid #d8dcd6; }
+.storm-previous { display: flex; flex-direction: column; justify-content: center; gap: 10px; font-size: 13px; }.storm-previous small { color: #687b7e; }
+.storm-next { display: grid; gap: 12px; padding: 32px; background: #19343e; color: #f6f5f0; border: 1px solid #294953; }.storm-next small { color: #d4b17b; }.storm-next strong { font-size: 24px; letter-spacing: -.025em; line-height: 1.3; }.storm-next > span { font-size: 13px; color: #c0d0d2; line-height: 1.8; }
+.storm-ticket-list { margin-top: 32px; border-top: 1px solid #d8dcd6; }.storm-ticket { background: #fcfbf7; border: 1px solid #d8dcd6; border-top: 0; }.storm-ticket summary { cursor: pointer; padding: 24px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }.storm-ticket summary:focus-visible { outline: 3px solid #bd8844; outline-offset: -3px; }.storm-ticket-id { font: 10px 'DM Mono', monospace; color: #687b7e; }.storm-ticket summary strong { font-size: 15px; }.storm-ticket-open { margin-left: auto; font-size: 11px; color: #796137; }.storm-ticket > div { padding: 0 24px 8px; }.storm-ticket[open] summary { border-bottom: 1px solid #e4e5df; margin-bottom: 20px; }.storm-ticket-question { padding: 16px; background: #efefe8; }.storm-demo-status { background: #eeeee7; }
+@media(max-width: 780px) { .storm-chapters ol { padding: 0 12px; }.storm-chapters a { padding: 16px 10px; gap: 8px; }.storm-chapters a > span:last-child { display: none; }.storm-chapters strong { font-size: 11px; }.storm-chapters small { font-size: 9px; }.storm-page-turn { grid-template-columns: 1fr; gap: 24px; }.storm-ticket-open { margin-left: 0; } }
+@media(max-width: 480px) { .storm-chapters ol { grid-template-columns: 1fr; padding: 0 20px; }.storm-chapters a { padding: 12px 8px; }.storm-chapters a > span:last-child { display: block; }.storm-chapters a > span:nth-child(2) { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }.storm-chapters strong { font-size: 12px; }.storm-page-turn { padding: 32px 20px 48px; }.storm-next { padding: 24px; }.storm-next strong { font-size: 21px; }.storm-ticket summary { padding: 20px; }.storm-ticket summary strong { width: 100%; } }
 .storm-page a:focus-visible { outline: 3px solid #bd8844; outline-offset: 6px; }
 .storm-skip { position: absolute; left: 24px; top: -100px; z-index: 5; padding: 14px; background: white; }.storm-skip:focus { top: 12px; }
 .storm-hero { position: relative; overflow: hidden; background: #142a35; color: #f7f5ee; }

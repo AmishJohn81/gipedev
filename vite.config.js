@@ -46,6 +46,8 @@ export default defineConfig({
       input: {
         main: resolve('index.html'),
         perfectStorm: resolve('perfect-storm/index.html'),
+        perfectStormExperience: resolve('perfect-storm/experience/index.html'),
+        perfectStormSolution: resolve('perfect-storm/solution/index.html'),
         asteroids: resolve('asteroids/index.html'),
         asteroidsScores: resolve('asteroids/scores/index.html'),
       },
