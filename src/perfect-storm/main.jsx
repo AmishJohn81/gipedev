@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../styles.css'
 import './storm.css'
@@ -18,13 +18,23 @@ const chapters = [
   { href: '/perfect-storm/', label: 'Understand the situation', short: 'The scenario' },
   { href: '/perfect-storm/experience/', label: 'Experience the problem', short: 'The queue' },
   { href: '/perfect-storm/solution/', label: 'Explore the solution', short: 'The solution demo' },
-  { href: '/perfect-storm/live/', label: 'Beyond the examples', short: 'Live AI triage' },
+  { href: '/perfect-storm/live/', label: 'Chart your own course.', short: 'Live AI triage' },
 ]
 const path = window.location.pathname.replace(/\/+$/, '')
 const chapter = path.endsWith('/experience') ? 1 : path.endsWith('/solution') ? 2 : path.endsWith('/live') ? 3 : 0
 
 function ChapterNavigation() {
-  return <nav className="storm-chapters" aria-label="Project chapters"><ol>{chapters.map((item, index) => <li key={item.href}><a href={item.href} aria-current={index === chapter ? 'page' : undefined}><span className="chapter-number">0{index + 1}</span><span><small>{item.short}</small><strong>{item.label}</strong></span><span aria-hidden="true">→</span></a></li>)}</ol></nav>
+  const [visited] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('perfect-storm-chapters'))
+      return Array.isArray(saved) ? saved.filter(index => Number.isInteger(index) && index >= 0 && index < chapters.length) : []
+    } catch { return [] }
+  })
+  useEffect(() => {
+    const next = [...new Set([...visited, chapter])]
+    try { sessionStorage.setItem('perfect-storm-chapters', JSON.stringify(next)) } catch { /* Navigation works without storage. */ }
+  }, [visited])
+  return <nav className="storm-chapters" aria-label="Project chapters"><ol>{chapters.map((item, index) => <li key={item.href} data-visited={visited.includes(index)}><a href={item.href} aria-current={index === chapter ? 'page' : undefined}><span className="chapter-number" title={visited.includes(index) && index !== chapter ? 'Visited chapter' : `Chapter ${index + 1}`}>{visited.includes(index) && index !== chapter ? '✓' : `0${index + 1}`}</span><span><small>{item.short}</small><strong>{item.label}</strong></span><span aria-hidden="true">→</span></a></li>)}</ol></nav>
 }
 
 function ChapterLinks() {
@@ -36,7 +46,7 @@ function ChapterLinks() {
 
 function ExperiencePage() {
   return <>
-    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 02 / Experience the problem</p><h1>You’re on<br /><em>the helpdesk.</em></h1><p className="storm-deck">The requests arrive together. The context does not.<br />Open a work order. Decide what you would need to know before routing it.</p><div className="storm-hero-bottom"><span>Fictional work orders · All awaiting triage</span><a href="#incoming">Open the queue ↓</a></div></div></section>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 02 / Experience the problem</p><p className="storm-bearing-subtitle">Take the helm.</p><h1>You’re on<br /><em>the helpdesk.</em></h1><p className="storm-deck">The requests arrive together. The context does not.<br />Open a work order. Decide what you would need to know before routing it.</p><div className="storm-hero-bottom"><span>Fictional work orders · All awaiting triage</span><a href="#incoming">Open the queue ↓</a></div></div></section>
     <ManualTriage />
     <section className="storm-approach"><div className="storm-section"><p className="storm-kicker">Pause before the solution</p><h2>Every handoff<br /><em>starts with a decision.</em></h2><p className="storm-approach-intro">Which team owns this? Is it part of a known incident? What information is missing? An analyst repeats these decisions for every request while the queue continues to grow.</p><p className="storm-approach-intro">The next chapter frames how assistance could reduce that effort while keeping the analyst in control.</p></div></section>
   </>
@@ -44,7 +54,7 @@ function ExperiencePage() {
 
 function SolutionPage() {
   return <>
-    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>Interactive walkthrough · Predefined recommendations</span><a href="#demo-direction">Try assisted triage ↓</a></div></div></section>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><p className="storm-bearing-subtitle">A clearer bearing.</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>Interactive walkthrough · Predefined recommendations</span><a href="#demo-direction">Try assisted triage ↓</a></div></div></section>
     <AssistedTriage />
     <IntendedOutcome />
   </>
@@ -62,7 +72,7 @@ function StormPage() {
       {chapter === 0 ? <>
       <section className="storm-hero">
         <div className="storm-hero-inner">
-          <p className="storm-kicker">Scenario study / 01 · Helpdesk triage</p>
+          <p className="storm-kicker">Scenario study / 01 · Helpdesk triage</p><p className="storm-bearing-subtitle">Four fronts. One crew.</p>
           <h1>The perfect storm.<br /><em>How to navigate it.</em></h1>
           <p className="storm-deck">An overwhelmed helpdesk. Competing priorities.<br />A clearer course starts with understanding the people in the queue.</p>
           <div className="storm-hero-bottom"><span>By John Gipe</span><a href="#backstory">Read the scenario ↓</a></div>

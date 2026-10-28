@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import TicketHandoff from './TicketHandoff.jsx'
 import { starters } from './triage-examples.js'
 import { analyzeTriage } from './triage-api.js'
+import Compass from './Compass.jsx'
 import './manual-triage.css'
 import './assisted-triage.css'
 import './live-triage.css'
@@ -70,7 +71,7 @@ export default function LiveTriagePage() {
   ][step]
 
   return <>
-    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 04 / Your own work order</p><h1>A new request.<br /><em>The same clear course.</em></h1><p className="storm-deck">Bring a work order, explore its next steps, and prepare a handoff with guidance along the way.</p><div className="storm-hero-bottom"><span>Live assessment / Human review</span><a href="#live-workspace">Start your walkthrough ↓</a></div></div></section>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 04 / Your own work order</p><h1>Chart your own<br /><em>course.</em></h1><p className="storm-deck">Bring a work order, explore its next steps, and prepare a handoff with guidance along the way.</p><div className="storm-hero-bottom"><span>Live assessment / Human review</span><a href="#live-workspace">Start your walkthrough ↓</a></div></div></section>
     <section className="storm-section live-workspace" id="live-workspace">
       <div className="assisted-disclosure"><strong>AI-assisted triage / Your decision, with context</strong><p>Use fictional details. When you request an assessment, your work order and any approved clarification exchange are sent to the AI service through the GipeDev API. Recommendations need your review; assignments stay in this walkthrough. If the service is not configured, the guided examples in chapter three remain available.</p></div>
       <div className="live-layout"><fieldset disabled={busy} className="live-main" aria-busy={busy}>
@@ -91,7 +92,7 @@ export default function LiveTriagePage() {
           {step >= 2 && <>{current.stage !== 'draft' && <details className="triage-directory"><summary>Clarification conversation</summary><div><strong>Approved follow-up</strong><p className="triage-note">{current.draft}</p>{current.stage === 'replied' ? <><strong>Submitter reply</strong><p className="triage-note">{reply}</p></> : <p>Reply pending.</p>}</div></details>}<TicketHandoff current={current} update={change => setCurrent(item => ({ ...item, ...change }))} route={() => { setCurrent(item => ({ ...item, routed: true })); setStep(3); focusNext() }} next={reset} allRouted={true} completionMessage="Your work order has a destination. The walkthrough is complete." />{step === 2 && <button className="triage-edit" type="button" onClick={() => { setStep(1); focusNext() }}>← Return to clarification</button>}</>}
           <button className="triage-edit live-reset" type="button" onClick={reset}>{step === 3 ? 'Start another request →' : 'Start over with a new request'}</button>
         </>}
-      </fieldset><aside className="live-guide" aria-label="Walkthrough guide"><p className="storm-kicker">Your course through the demo</p><ol>{steps.map((label, index) => <li key={label} aria-current={index === step ? 'step' : undefined}><span>{index < step || step === 3 ? '✓' : `0${index + 1}`}</span>{label}</li>)}</ol><div aria-live="polite"><h3>{guidance[0]}</h3><p>{guidance[1]}</p><p className="live-guide-next">{guidance[2]}</p>{reassessed && step === 1 && <p>✓ Your reply is included. You’re ready to review the handoff.</p>}</div><small>You make the final decision. Suggestions and priorities are starting points for your review.</small></aside></div>
+      </fieldset><aside className="live-guide" aria-label="Walkthrough guide"><div className="live-bearing-heading"><p className="storm-kicker">Your bearings</p><Compass step={step} /></div><ol>{steps.map((label, index) => <li key={label} aria-current={index === step ? 'step' : undefined}><span>{index < step || step === 3 ? '✓' : `0${index + 1}`}</span>{label}</li>)}</ol><div aria-live="polite"><h3>{guidance[0]}</h3><p>{guidance[1]}</p><p className="live-guide-next">{guidance[2]}</p>{reassessed && step === 1 && <p>✓ Your reply is included. You’re ready to review the handoff.</p>}</div><section className="live-model-note" aria-labelledby="model-choice-title"><p className="storm-kicker">Model choice</p><h4 id="model-choice-title">OpenAI GPT-5.4 mini</h4><p>I chose GPT-5.4 mini to balance response time, cost, and the ability to interpret helpdesk requests. Its support for structured responses fits the routing and handoff fields in this demo, while keeping each recommendation open to analyst review.</p></section><small>You make the final decision. Suggestions and priorities are starting points for your review.</small></aside></div>
     </section>
   </>
 }

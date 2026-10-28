@@ -148,8 +148,8 @@ function App() {
             </div>
             <div className="project-details">
               <div className="project-meta"><span>Helpdesk triage</span><span>Scenario study</span></div>
-              <h3>A perfect storm hits the helpdesk...<br />How do they navigate it?</h3>
-              <p>New hires. A major release. An external outage. An urgent security advisory. One overwhelmed helpdesk, and a queue that keeps growing.</p>
+              <h3>A perfect storm hits the helpdesk...</h3>
+              <p>New hires. A major release. An external outage. An urgent security advisory. One overwhelmed helpdesk, and a queue that keeps growing. How will they navigate it?</p>
               <span className="project-link">Explore the scenario <Arrow /></span>
             </div>
           </a>
@@ -159,15 +159,15 @@ function App() {
               <span className="preview-label">In development</span>
               <svg viewBox="0 0 180 100" aria-hidden="true">
                 <path d="m156 50-90-30 18 30-18 30 90-30Z" />
-                <path className="asteroid-trail trail-red" d="M78 38 6 15" />
+                <path className="asteroid-trail trail-red" d="M70.8 38-1.2 15" />
                 <path className="asteroid-trail trail-yellow" d="M78 50 0 50" />
-                <path className="asteroid-trail trail-blue" d="M78 62 6 85" />
+                <path className="asteroid-trail trail-blue" d="M70.8 62-1.2 85" />
               </svg>
             </div>
             <div className="project-details">
               <div className="project-meta"><span>Leaderboard</span><span>Prototype</span></div>
-              <h3>Asteroids Home League</h3>
-              <p>A cabinet-inspired high-score tracker for an original Asteroids machine and the pilots brave enough to play it.</p>
+              <h3>Asteroids Persistent High Score Tracker</h3>
+              <p>A cabinet-inspired high-score tracker for an original Asteroids machine and the pilots brave enough to play it. The best part? No losing scores when the power goes out!</p>
               <span className="project-link">Launch prototype <Arrow /></span>
             </div>
           </a>

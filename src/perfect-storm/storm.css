@@ -1,4 +1,6 @@
 .storm-page { background: #f6f5f0; color: #18303b; }
+.course-compass { width: 56px; height: 56px; flex-shrink: 0; color: #d4b17b; }.course-needle { transform-origin: 32px 32px; transition: transform .25s ease; }
+.storm-hero .storm-bearing-subtitle { margin: -10px 0 28px; color: #d4b17b; font-size: 15px; letter-spacing: .035em; }
 .storm-chapters { display: block; background: #eeeee7; border-top: 1px solid #d8dcd6; border-bottom: 1px solid #d8dcd6; }
 .storm-chapters ol { max-width: 1180px; padding: 0 28px; margin: auto; list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); }
 .storm-chapters li { min-width: 0; }
@@ -31,3 +33,16 @@
 
 .storm-outcome-details { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin: 36px 0; padding-top: 32px; border-top: 1px solid #ffffff30; }.storm-outcome-details h3 { font-size: 22px; line-height: 1.4; margin: 0 0 18px; }.storm-outcome-details p { color: #c0d0d2 !important; font-size: 14px !important; }
 @media(max-width: 780px) { .storm-outcome-details { grid-template-columns: 1fr; gap: 24px; } }
+
+/* Connected chapter waypoints; checkmarks indicate pages visited in this tab. */
+.storm-chapters li { position: relative; }
+.storm-chapters li:not(:last-child)::after { content: ''; position: absolute; top: 36px; left: 48px; right: -18px; height: 1px; background: #b9c4bd; pointer-events: none; z-index: 1; }
+.storm-chapters li[data-visited="true"]::after { background: #a58a5d; }
+.storm-chapters a { position: relative; flex-direction: column; align-items: flex-start; gap: 14px; }
+.storm-chapters .chapter-number { display: grid; place-items: center; position: relative; z-index: 2; width: 28px; height: 28px; border: 1px solid #a3b2ac; border-radius: 50%; background: #eeeee7; font-size: 10px; }
+.storm-chapters li[data-visited="true"] .chapter-number { background: #dfe8df; color: #315844; border-color: #9aad9e; }
+.storm-chapters a[aria-current="page"] .chapter-number { color: #80602e; background: #fffdf7; border-color: #a57e43; box-shadow: 0 0 0 4px #a57e4325; }
+.storm-chapters a > span:last-child { display: none; }
+@media(max-width: 780px) { .storm-chapters li:not(:last-child)::after { top: 30px; right: -10px; left: 40px; }.storm-chapters li:nth-child(2)::after { display: none; } }
+@media(max-width: 480px) { .storm-chapters a { flex-direction: row; align-items: center; gap: 14px; }.storm-chapters li:not(:last-child)::after { display: block; left: 22px; top: 42px; bottom: -12px; right: auto; width: 1px; height: auto; }.storm-chapters a > span:nth-child(2) { display: block; } }
+@media(prefers-reduced-motion: reduce) { .course-needle { transition: none; } }

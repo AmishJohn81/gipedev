@@ -6,3 +6,6 @@
 @media(max-width: 700px) { .live-layout { display: flex; flex-direction: column; }.live-guide { position: static; width: 100%; order: -1; }.live-guide ol { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }.live-main { width: 100%; } }
 
 fieldset.live-main { border: 0; padding: 0; margin: 0; }.live-progress { padding: 18px; background: #e2eee5; border-left: 3px solid #6b977d; }.live-error a { text-decoration: underline; }.live-main:disabled { opacity: .8; }
+.live-model-note { border-top: 1px solid #ffffff30; margin: 24px 0; padding-top: 22px; }.live-model-note .storm-kicker { margin-bottom: 10px; }.live-model-note h4 { margin: 0 0 12px; color: #d4b17b; font-size: 17px; line-height: 1.5; }.live-model-note p:last-child { margin-bottom: 0; }
+
+.live-bearing-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }.live-bearing-heading .storm-kicker { margin: 0; }.handoff-receipt .handoff-port { color: #315844; font-size: 16px; font-weight: 600; margin: 0 0 14px; }
