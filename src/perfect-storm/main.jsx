@@ -54,7 +54,7 @@ function ExperiencePage() {
 
 function SolutionPage() {
   return <>
-    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><p className="storm-bearing-subtitle">A clearer bearing.</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>Interactive walkthrough · Predefined recommendations</span><a href="#demo-direction">Try assisted triage ↓</a></div></div></section>
+    <section className="storm-hero"><div className="storm-hero-inner"><p className="storm-kicker">Chapter 03 / The solution demo</p><p className="storm-bearing-subtitle">A clearer bearing.</p><h1>A clearer course<br /><em>for every request.</em></h1><p className="storm-deck">Help the analyst understand the request, find its owner, and make a confident handoff.</p><div className="storm-hero-bottom"><span>AI-assisted workflow · Guided examples</span><a href="#demo-direction">Try assisted triage ↓</a></div></div></section>
     <AssistedTriage />
     <IntendedOutcome />
   </>
